@@ -1,0 +1,3 @@
+set -default HAZELESQUE_REPO_URL=https://chimera-repo.hazelesque.uk
+
+v3 ${HAZELESQUE_REPO_URL}/${CHIMERA_REPO_RELEASE}/user
