@@ -1,0 +1,15 @@
+diff -ur readpe-0.84.orig/include/compat/sys/queue.h readpe-0.84/include/compat/sys/queue.h
+--- readpe-0.84.orig/include/compat/sys/queue.h	2024-02-01 03:39:11.000000000 +0000
++++ readpe-0.84/include/compat/sys/queue.h	2025-06-19 11:31:10.898136335 +0100
+@@ -34,7 +34,11 @@
+ #ifndef _SYS_QUEUE_H_
+ #define	_SYS_QUEUE_H_
+ 
++#if defined(_GNU_SOURCE) // GNU-specific
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
++#endif
+ 
+ /*
+  * This file defines four types of data structures: singly-linked lists,

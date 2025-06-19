@@ -1,0 +1,17 @@
+diff -ur tmp/readpe/lib/libpe/error.c readpe/lib/libpe/error.c
+--- tmp/readpe/lib/libpe/error.c	2025-06-19 11:07:14.250532290 +0100
++++ readpe/lib/libpe/error.c	2025-06-19 11:11:41.390615336 +0100
+@@ -122,7 +122,12 @@
+ 		/* int ret = */ strerror_r(errno, errmsg, sizeof errmsg);
+ 		const char *errmsg_ptr = errmsg;
+ #elif defined(_GNU_SOURCE) // GNU-specific
+-		const char *errmsg_ptr = strerror_r(errno, errmsg, sizeof errmsg);
++#ifndef __GLIBC__
++                int ret = strerror_r(errno, errmsg, sizeof errmsg);
++                const char *errmsg_ptr = errmsg;
++#else
++                const char *errmsg_ptr = strerror_r(errno, errmsg, sizeof errmsg);
++#endif
+ #else // Fallback to XSI-compliant
+ 		/* int ret = */ strerror_r(errno, errmsg, sizeof errmsg);
+ 		const char *errmsg_ptr = errmsg;
