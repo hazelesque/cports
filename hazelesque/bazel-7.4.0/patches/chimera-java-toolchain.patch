@@ -1,0 +1,54 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: Wire in a non-prebuilt Java 21 toolchain via extra_toolchains
+
+Bazel's default Java toolchain resolution downloads
+@remote_java_tools_linux + @remotejdk11_linux from cdn.azul.com,
+both of which are glibc-linked prebuilts.  On Chimera (musl libc)
+they fail to execvp — the dynamic linker is /lib64/ld-linux-x86-
+64.so.2 but musl's is /lib/ld-musl-x86_64.so.1, and the kernel
+returns ENOENT for the missing interpreter (which surfaces as
+"error=2 No such file or directory" pointing at javac, not the
+interpreter).
+
+The fix mirrors what scm-infra/copybara does in
+tools/chimera_java_toolchain/BUILD and what Alpine's bazel7
+APKBUILD ships as 0000-local-jdk.patch:
+
+  - Add a `default_java_toolchain(...)` target that uses
+    `@local_jdk//:jdk` for the runtime and source-builds the
+    ijar / singlejar / TurbineDirect from the bazel tree itself.
+    @local_jdk picks up JAVA_HOME (set to /usr/lib/jvm/java-21-
+    openjdk in our cports template).
+  - Register that toolchain via `common --extra_toolchains=...`
+    in .bazelrc so it wins resolution over the prebuilt default.
+
+`--tool_java_runtime_version=local_jdk` in EXTRA_BAZEL_ARGS is
+still required to keep the @remotejdk11_linux download from
+firing for the JavaToolchainCompileClasses action that builds
+platformclasspath_classes.
+
+diff --git a/.bazelrc b/.bazelrc
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -92,3 +92,5 @@ test:ci-windows --test_env=JAVA_HOME
+ test:ci-windows --test_env=TEST_INSTALL_BASE=C:/b/bazeltest_install_base
+ test:ci-windows --test_env=REPOSITORY_CACHE=C:/b/bazeltest_repo_cache
+ test:ci-windows --test_tag_filters=-no_windows,-slow
++
++common --extra_toolchains=//tools/chimera_java_toolchain:non_prebuilt_java_21_toolchain_definition
+diff --git a/tools/chimera_java_toolchain/BUILD.bazel b/tools/chimera_java_toolchain/BUILD.bazel
+new file mode 100644
+--- /dev/null
++++ b/tools/chimera_java_toolchain/BUILD.bazel
+@@ -0,0 +1,11 @@
++load("@rules_java//toolchains:default_java_toolchain.bzl", "default_java_toolchain")
++
++default_java_toolchain(
++    name = "non_prebuilt_java_21_toolchain",
++    header_compiler_direct = "@remote_java_tools//:TurbineDirect",
++    ijar = "//third_party/ijar:ijar",
++    java_runtime = "@local_jdk//:jdk",
++    singlejar = "//src/tools/singlejar:singlejar",
++    source_version = "21",
++    target_version = "21",
++)
