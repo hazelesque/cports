@@ -1,0 +1,37 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: singlejar: provide off64_t typedef on musl Linux
+
+singlejar's port.h falls through to "no off64_t typedef needed"
+on Linux, expecting glibc to provide both off_t and off64_t in
+<sys/types.h>.  Musl exposes only one (off_t, which IS 64-bit
+when _LARGEFILE64_SOURCE is set) — so the static_assert at
+the bottom of the file fails because off64_t isn't a type.
+
+Mirror what glibc and musl actually do: on glibc define
+off_t in terms of off64_t (the LFS path glibc takes when
+_FILE_OFFSET_BITS=64), on musl define off64_t in terms of
+off_t (since musl's off_t already is 64-bit).  features.h is
+included so __GLIBC__ / __GNU_LIBRARY__ resolve; either macro
+catches glibc, neither catches musl.
+
+This is the same gap p4source crosses with `-D_GNU_SOURCE
+-D_LARGEFILE64_SOURCE` in CCFLAGS — see scm-infra's
+copybara/.bazelrc chimera config for the bazel-side equivalent.
+
+diff --git a/src/tools/singlejar/port.h b/src/tools/singlejar/port.h
+--- a/src/tools/singlejar/port.h
++++ b/src/tools/singlejar/port.h
+@@ -34,6 +34,13 @@
+ typedef __int64 off64_t;
+ #elif defined(__OpenBSD__)
+ typedef int64_t off64_t;
++#elif defined(__GLIBC__) || defined(__linux__)
++#include <features.h>
++#if defined(__GNU_LIBRARY__) || defined(__GLIBC__)
++typedef off64_t off_t;
++#else
++typedef off_t off64_t;
++#endif
+ #endif
+ static_assert(sizeof(off64_t) == 8, "File offset type must be 64-bit");
+
