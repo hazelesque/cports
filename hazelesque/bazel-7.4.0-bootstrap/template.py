@@ -2,6 +2,13 @@ pkgname = "bazel-7.4.0-bootstrap"
 pkgver = "7.4.0"
 pkgrel = 0
 archs = ["aarch64", "ppc64le", "x86_64"]
+# cports default is extract -> prepare -> patch.  We invoke the
+# entire build from prepare(), so patches that need to be in the
+# tree before compile.sh reads them (chimera-java-toolchain,
+# musl-* fixes) must apply first.  The previously-shipped 32 MB
+# apk built without this flag and apparently lucked out on
+# compile.sh's stage-2 path; don't rely on that for rebuilds.
+prepare_after_patch = True
 hostmakedepends = [
     "bash",
     "clang",
