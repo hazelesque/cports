@@ -1,0 +1,55 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: Exception.cc: stub backtrace() when execinfo.h is absent
+
+<execinfo.h> is a glibc / libexecinfo header — Chimera's musl
+doesn't ship it and there's no libexecinfo package.
+
+Guard the include with __has_include and fall back to a
+single 'backtrace unavailable' spdlog::error in printBacktrace().
+Indexer correctness is unaffected; only the on-crash diagnostic
+is degraded.  If you want real stack walks on Chimera, the
+future work is wiring up libunwind here.
+
+diff --git a/indexer/Exception.cc b/indexer/Exception.cc
+index f099b61..1f53592 100644
+--- a/indexer/Exception.cc
++++ b/indexer/Exception.cc
+@@ -1,4 +1,15 @@
+-#include <execinfo.h>
++// LOCAL PATCH (Chimera / musl): <execinfo.h> is a glibc / libexecinfo
++// header; Chimera's musl libc doesn't provide it and the user's
++// system has no libexecinfo package.  Guard the include + all
++// backtrace() / backtrace_symbols() calls so scip-clang builds
++// without stack-walking support; printBacktrace() becomes a
++// no-op-plus-hint when execinfo is absent.
++#if __has_include(<execinfo.h>)
++#  include <execinfo.h>
++#  define SCIP_CLANG_HAVE_EXECINFO 1
++#else
++#  define SCIP_CLANG_HAVE_EXECINFO 0
++#endif
+ #include <string>
+ #include <string_view>
+ 
+@@ -44,6 +55,7 @@ namespace scip_clang {
+ std::string exceptionContext = "";
+ 
+ void Exception::printBacktrace() noexcept {
++#if SCIP_CLANG_HAVE_EXECINFO
+   int traceSize = 0;
+   auto **messages = (char **)nullptr;
+   std::string programName = getProgramName();
+@@ -58,6 +70,13 @@ void Exception::printBacktrace() noexcept {
+   if (messages != nullptr) {
+     free(messages);
+   }
++#else
++  // musl / no libexecinfo — stub.  An exception thrown from
++  // scip-clang on Chimera surfaces a "backtrace unavailable"
++  // note instead of a real stack trace.  Indexer correctness
++  // is unaffected; only the on-crash diagnostic is degraded.
++  spdlog::error("Backtrace: <unavailable — built without execinfo.h>");
++#endif
+ }
+ 
+ } // namespace scip_clang

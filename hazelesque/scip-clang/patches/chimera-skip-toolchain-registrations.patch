@@ -1,0 +1,79 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: WORKSPACE: skip glibc-linked LLVM and Python toolchain registrations
+
+Upstream registers `@llvm_toolchain_llvm` (glibc-linked clang from
+toolchains_llvm) and a hermetic Python 3.10 (also glibc-targeted).
+Both fail to execvp on Chimera's musl libc — wrong ld.so.
+
+Skipping `llvm_register_toolchains()` lets bazel fall back to
+local_config_cc + the system clang (musl-linked, Chimera default,
+binary-compatible with the LLVM 21 sources scip-clang links).
+Override .bazelrc's BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN at the
+command line so detection actually runs.
+
+Skipping `python_register_toolchains` + `pip_parse` is fine
+because the only consumers of @python_deps are //tools py_binary
+targets we don't build — //indexer:scip-clang has no Python deps.
+
+diff --git a/WORKSPACE b/WORKSPACE
+index 3917191..c2fa7c5 100644
+--- a/WORKSPACE
++++ b/WORKSPACE
+@@ -33,30 +33,36 @@ load("//:setup_llvm.bzl", "setup_llvm_toolchain")
+ 
+ setup_llvm_toolchain(name = "llvm_toolchain")
+ 
+-load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+-load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+-
+-llvm_register_toolchains()
+-
+-python_register_toolchains(
+-    name = "python_3_10",
+-    # Remove this once agents stop running tests as root
+-    # https://github.com/sourcegraph/sourcegraph/issues/47943
+-    ignore_root_user_error = True,
+-    python_version = "3.10",
+-)
++load("@rules_python//python:repositories.bzl", "py_repositories")
++
++# LOCAL PATCH (Chimera / musl): upstream calls
++# `llvm_register_toolchains()` which points bazel's cc toolchain
++# resolution at `@llvm_toolchain_llvm//bin/clang` — a glibc-linked
++# pre-built from the `toolchains_llvm` rule's download.  That
++# binary can't execvp on Chimera's musl libc (wrong dynamic
++# linker: /lib64/ld-linux-x86-64.so.2 vs /lib/ld-musl-x86_64.so.1),
++# so cc actions fail with "required file not found" once bazel
++# tries to compile LLVM 21 source, boost, protobuf etc.
++#
++# Skipping the register call here falls back to bazel's
++# local_config_cc auto-detection, which picks up the system
++# clang (`/usr/bin/clang`, musl-linked, Chimera's default).  The
++# .bazelrc sets `BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1`; override
++# that on the command line so detection runs.  Chimera's clang
++# is 21.1.8 which is binary-compatible with the bundled LLVM 21
++# sources scip-clang links against.
++
++# LOCAL PATCH (Chimera / Python 3.13): upstream calls
++# `python_register_toolchains(...)` (downloads a glibc-targeted
++# Python that doesn't run on Chimera's musl) and then
++# `pip_parse(...)` (whose vendored pip is incompatible with
++# Python 3.13 — `pkgutil.ImpImporter` was removed).  The only
++# consumers of @python_deps are //tools py_binary targets we're
++# not building.  Keep py_repositories() for rules_python
++# internals; skip the hermetic interpreter + pip_parse entirely.
+ 
+ py_repositories()
+ 
+-load("@python_3_10//:defs.bzl", "interpreter")
+-load("@rules_python//python:pip.bzl", "pip_parse")
+-
+-pip_parse(
+-    name = "python_deps",
+-    python_interpreter_target = interpreter,
+-    requirements = "//tools:requirements_lock.txt",
+-)
+-
+ load("//:setup_deps.bzl", "setup_dependencies")
+ 
+ setup_dependencies()
