@@ -1,6 +1,6 @@
 pkgname = "bazel-7.4.0"
 pkgver = "7.4.0"
-pkgrel = 0
+pkgrel = 1
 archs = ["aarch64", "ppc64le", "x86_64"]
 # cports default is extract -> prepare -> patch; we need patches
 # (chimera-java-toolchain in particular) applied BEFORE bazel-
@@ -86,9 +86,15 @@ def prepare(self):
         "--host_copt=-D_LARGEFILE64_SOURCE",
         "--java_runtime_version=local_jdk",
         "--tool_java_runtime_version=local_jdk",
-        # Equivalent to compile.sh's EMBED_LABEL — bakes a real
-        # version string into the resulting bazel binary so
-        # `bazel --version` doesn't read "(non-git)".
+        # `--embed_label` is silently ignored unless `--stamp` is
+        # also set; without both, `bazel --version` reads
+        # "no_version" and downstream tooling that keys off
+        # bazel_features (which parses the version string to detect
+        # available Starlark globals) blows up on `name 'macro' is
+        # not defined`-shaped errors against newer rules sets.
+        # compile.sh's EMBED_LABEL_ARG sets the pair together; mirror
+        # that here for bazel-build-bazel.
+        "--stamp",
         f"--embed_label={pkgver}",
     ]
     # //src:bazel_nojdk, not //src:bazel.  The latter triggers
