@@ -1,0 +1,95 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: project/JavaToolchainPlugin: use JAVA_HOME instead of fetching JDKs
+
+The plugin auto-applies to every subproject and resolves toolchain
+JDKs by shelling out to `bin/coursier java-home --jvm <ver>`.
+Coursier downloads any missing JDK from cdn.azul.com /
+adoptium-binaries on demand — but those tarballs are
+glibc-linked, so they cannot exec on Chimera's musl libc even
+if we let the download complete.
+
+Two surgical changes:
+
+(1) `getJavaHome` short-circuits to `$JAVA_HOME`.  cports' template
+    sets this to /usr/lib/jvm/java-21-openjdk; one JDK serves all
+    `javaToolchainVersion` queries since javac on JDK 21 can target
+    earlier classfile versions natively.
+
+(2) `javacOptions` switches from
+        "-target", "1.8", "-source", "1.8", "-bootclasspath", <rt.jar>
+    to
+        "--release", javaToolchainVersion.value
+    `--release N` was added in JDK 9 and is the modern equivalent
+    of `-target N -source N -bootclasspath rtN.jar` — javac uses
+    bundled CT signature files for the requested release, so we
+    don't need a separate JDK 8 install (or its rt.jar) on disk.
+    The per-subproject `javaToolchainVersion := "8"|"11"|"17"|"21"`
+    overrides in build.sbt continue to work as before; "11"
+    (the plugin default) and "8" are the common cases.
+
+This produces semantically identical bytecode for the embedded
+javac plugins (semanticdb-javac etc.) — they remain Java-8
+binary-compatible, just compiled by JDK 21's javac in
+cross-compile mode rather than JDK 8 itself.
+
+--- a/project/JavaToolchainPlugin.scala
++++ b/project/JavaToolchainPlugin.scala
+@@ -27,16 +27,13 @@
+   import autoImport._
+ 
+   override lazy val projectSettings: Seq[Def.Setting[_]] = List(
++    // PATCH (Chimera): use --release instead of -target/-source/
++    // -bootclasspath so we don't need a separate JDK 8 install.
++    // JDK 21's javac generates per-release CT signatures itself.
+     javacOptions ++=
+-      List(
+-        "-target",
+-        "1.8",
+-        "-source",
+-        "1.8",
+-        "-bootclasspath",
+-        java8Bootclasspath()
+-      ),
+-    (doc / javacOptions) --= List("-target", "1.8"),
++      List("--release", javaToolchainVersion.value),
++    (doc / javacOptions) --=
++      List("--release", javaToolchainVersion.value),
+     (doc / javacOptions) --= bootclasspathSettings(javaToolchainVersion.value),
+     (doc / javacOptions) --= List("-g"),
+     javacOptions ++= bootclasspathSettings(javaToolchainVersion.value),
+@@ -77,26 +74,15 @@
+       version: String,
+       jvmIndex: Option[String] = None
+   ): File = {
+-    javaHomeCache.computeIfAbsent(
+-      version,
+-      (v: String) => {
+-        val coursier = Paths.get("bin", "coursier")
+-        val index = jvmIndex
+-          .toList
+-          .flatMap(index => "--jvm-index" :: index :: Nil)
+-        val arguments =
+-          List(
+-            "java",
+-            "-jar",
+-            coursier.toString,
+-            "java-home",
+-            "--jvm",
+-            jvmName(v)
+-          ) ++ index
+-
+-        new File(Process(arguments).!!.trim)
+-      }
+-    )
++    // PATCH (Chimera): cports' build sandbox can't run the
++    // glibc-linked Adoptium / Zulu JDK tarballs Coursier would
++    // download on demand.  Point all toolchain queries at
++    // $JAVA_HOME (set to JDK 21 by the cports template) and let
++    // javac handle cross-target compatibility via --release.
++    new File(sys.env.getOrElse("JAVA_HOME",
++      sys.error(
++        "JAVA_HOME must be set for JavaToolchainPlugin (Chimera build)"
++      )))
+   }
+ 
+   private def jvmName(version: String) =

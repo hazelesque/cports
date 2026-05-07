@@ -1,6 +1,6 @@
 pkgname = "flameshot"
 pkgver = "13.3.0"
-pkgrel = 0
+pkgrel = 1
 build_style = "cmake"
 # Disable bundled KDSingleApplication so we use cports' system
 # package; the bundled FetchContent path needs network during
@@ -29,6 +29,19 @@ makedepends = [
     "qt6-qtsvg-devel",
     "qt6-qttools-devel",
     "qt6-qtwayland-devel",
+]
+# Qt's SVG image-format plugin is loaded at runtime via
+# QPluginLoader, not direct linking — cports' shlib scanner
+# can't see the dependency.  Without it, flameshot's bundled
+# SVG toolbar icons render as Qt's "missing icon" fallback
+# (plain purple circles); tooltips still work because they're
+# string lookups.  Same logic for qt6-qtwayland's runtime
+# plugin on Wayland sessions and the imageformats plugins for
+# non-PNG screenshot output.
+depends = [
+    "qt6-qtimageformats",
+    "qt6-qtsvg",
+    "qt6-qtwayland",
 ]
 pkgdesc = "Powerful yet simple to use screenshot software"
 license = "GPL-3.0-or-later"

@@ -1,0 +1,31 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: build.sbt: bump V.protobuf 3.15.6 -> 4.32.0 to match system protoc
+
+protoc 5.32 (cports' `protobuf-protoc`) generates Java code that
+references com.google.protobuf.RuntimeVersion,
+com.google.protobuf.Generated, GeneratedMessage.isStringEmpty,
+LazyStringArrayList.emptyList, etc.  None of those exist in
+protobuf-java 3.15.6 — they were added in the 4.27 series along
+with the protobuf-java major-version reset to 4.x.
+
+Bump the runtime to 4.32.0 to match protoc 5.32's codegen.  The
+protobuf-java APIs scip-java actually uses (parseFrom, builders,
+iterators, *OrBuilder interfaces) are stable across the bump;
+the changes are additive and concentrated in the generated-code
+helper classes.
+
+This is the minimum bump needed — picking 4.32.0 specifically
+to match cports' `protobuf-protoc` 5.32.x.
+
+diff --git a/build.sbt b/build.sbt
+--- a/build.sbt
++++ b/build.sbt
+@@ -9,7 +9,7 @@
+
+ lazy val V =
+   new {
+-    val protobuf = "3.15.6"
++    val protobuf = "4.32.0"
+     val protoc =
+       "3.17.3" // the oldest protoc version with Apple M1 support, see https://github.com/scalapb/ScalaPB/issues/1024#issuecomment-860126568
+     val coursier = "2.1.9"

@@ -1,0 +1,45 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: Add ChimeraProtocOverride autoplugin: redirect protocExecutable to /usr/bin/protoc
+
+sbt-protoc honors `PB.protocVersion` by downloading
+`protoc-linux-x86_64-<ver>` from Maven into
+$HOME/.cache/protocbridge.  That binary is glibc-linked and
+fails to exec on musl with the usual ENOENT-shaped dynamic-
+linker resolution failure.
+
+Setting `ThisBuild / PB.protocExecutable := ...` in a `.sbt` file
+at the build root doesn't take — sbt-protoc's `ProtocPlugin`
+attaches a per-project default for `protocExecutable` derived
+from `protocVersion`, and per-project scope beats ThisBuild.
+
+The right fix is an AutoPlugin in `project/` that overrides
+`protocExecutable` at projectSettings scope (same scope as the
+plugin's own default) for every project that has ProtocPlugin
+enabled.  `requires = ProtocPlugin` + `trigger = allRequirements`
+makes it auto-apply.
+
+cports' `protobuf` package provides /usr/bin/protoc (5.32.x);
+proto3 syntax is fully forward-compatible at the wire and Java
+codegen levels with the 3.17.3 sbt-protoc pin.
+
+diff --git a/project/ChimeraProtocOverride.scala b/project/ChimeraProtocOverride.scala
+new file mode 100644
+--- /dev/null
++++ b/project/ChimeraProtocOverride.scala
+@@ -0,0 +1,16 @@
++import sbt._
++import sbt.Keys._
++import sbtprotoc.ProtocPlugin
++import sbtprotoc.ProtocPlugin.autoImport._
++
++/** Chimera-specific override.  The Adoptium / Maven-hosted protoc
++ *  pinned via PB.protocVersion is glibc-linked; cports' bldroot
++ *  is musl.  Redirect at /usr/bin/protoc (cports' protobuf pkg).
++ */
++object ChimeraProtocOverride extends AutoPlugin {
++  override def trigger = allRequirements
++  override def requires = ProtocPlugin
++  override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
++    PB.protocExecutable := file("/usr/bin/protoc")
++  )
++}

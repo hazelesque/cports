@@ -1,25 +1,44 @@
 # The "SCIP generator for Bazel" piece of github.com/uber/scip-lsp.
-# Concretely the `bsp_server/scip_sync_util:scip_sync` py_binary —
-# the rest of scip-lsp (the Go ulsp-daemon, the VS Code extension)
-# is intentionally out of scope.
+# Concretely the `bsp_server/scip_sync_util:scip_sync` py_binary
+# (the Python driver) PLUS the bazel-side aspect + Java aggregator
+# tree it consumes.  The Go ulsp-daemon and VS Code extension are
+# intentionally out of scope.
 #
-# upstream's scip_sync runs as a `bazel run` py_binary target,
-# meaning bazel materializes a runfiles tree and a launcher script.
-# We ship something cleaner: the bsp_server.* Python package tree
-# under site-packages (PEP 420 namespace, no __init__.py needed)
-# and a one-line shell launcher that does
-# `python3 -m bsp_server.scip_sync_util.scip_sync "$@"`.
+# Two install destinations:
 #
-# scip_sync at runtime invokes `bazel query` / `bazel run` against
-# the *target* repo's MODULE.bazel / BUILD files — the indexer
-# targets (scip-java, scip-clang) live in the repo being indexed,
-# not in this package.  README's "Manual Setup Steps" enumerates
-# the bazel_dep + maven.install entries the user must add to their
-# repo's MODULE.bazel.
+# (1) /usr/lib/python<ver>/site-packages/bsp_server/{scip_sync_util,
+#     bazel,util}/ — the Python driver.  Upstream runs this via
+#     `bazel run`, materializing a runfiles tree; we ship it as a
+#     plain Python package with a /usr/bin/scip-sync launcher that
+#     does `python3 -m bsp_server.scip_sync_util.scip_sync "$@"`.
+#     PEP 420 namespace package so no __init__.py needed.
+#
+# (2) /usr/share/scip-lsp/{MODULE.bazel, bsp_server/indexer/,
+#     src/main/java/com/uber/{scip,intellij}/} — the aspect .bzl,
+#     its BUILD.bazel + config.template, and the Java aggregator /
+#     extractor / decompiler source the aspect references via
+#     @scip_lsp//src/main/java/...:*_bin.  scip_sync.py shells out
+#     to `bazel build ... --aspects=@scip_lsp//bsp_server/indexer:
+#     scip.bzl%scip_java_aspect`; the user must wire @scip_lsp into
+#     their target repo so bazel can find the aspect (see header
+#     of /usr/share/scip-lsp/MODULE.bazel — local_path_override).
+#
+# Indexing flow at runtime:
+#   1. Target repo's MODULE.bazel does
+#        local_path_override(module_name = "scip-lsp",
+#                            path = "/usr/share/scip-lsp")
+#      (or equivalently passes --override_module to bazel).
+#   2. User's repo's MODULE.bazel also pulls in the SCIP-Java
+#      maven artifacts per upstream README's "Manual Setup Steps"
+#      (com.sourcegraph:scip-java_2.13, scip-semanticdb, etc.).
+#   3. `scip-sync --cwd=<target-repo>` discovers java_* targets,
+#      shells out to `bazel build ... --aspects ...`, and bazel
+#      builds aggregator_bin + extractor_bin + decompiler_bin from
+#      the @scip_lsp tree under /usr/share/scip-lsp/ on demand.
 
 pkgname = "scip-lsp-bazel-generator"
 pkgver = "0.1.2"
-pkgrel = 0
+pkgrel = 1
 hostmakedepends = [
     # Needed at configure time so cbuild populates
     # self.python_version (see Packaging.md "self.python_version").
@@ -43,8 +62,10 @@ license = "Apache-2.0"
 url = "https://github.com/uber/scip-lsp"
 source = f"{url}/archive/refs/tags/v{pkgver}.tar.gz"
 sha256 = "ee83b4df4ebe8aab9de6101099df58a49f49c2d60a4843578799efd441b2962f"
-# No build phase — we only ship .py files.  No tests run because
-# the upstream pytest fixtures need bazel + a fake target repo.
+# No build phase — we only ship .py + .java + .bzl files; the
+# Java aggregator is built on demand by the consuming repo's
+# bazel.  No tests run because the upstream pytest fixtures need
+# bazel + a fake target repo.
 options = [
     "!check",
     "!cross",
@@ -85,3 +106,21 @@ def install(self):
     # because cports' template API doesn't expose a write-file
     # helper.
     self.install_file(self.files_path / "scip-sync", "usr/bin", mode=0o755)
+    # Bazel-side aspect data.  Mirrors upstream paths under
+    # /usr/share/scip-lsp/ so a target repo's
+    #   local_path_override(module_name="scip-lsp",
+    #                       path="/usr/share/scip-lsp")
+    # in MODULE.bazel makes @scip_lsp resolve to this tree.
+    # bazel will build the Java aggregator/extractor/decompiler
+    # binaries from these sources on demand when scip_sync.py
+    # invokes `bazel build ... --aspects=@scip_lsp//bsp_server/
+    # indexer:scip.bzl%scip_java_aspect`.
+    sd = "usr/share/scip-lsp"
+    self.install_file("MODULE.bazel", sd)
+    self.install_files("bsp_server/indexer", f"{sd}/bsp_server")
+    self.install_files(
+        "src/main/java/com/uber/scip", f"{sd}/src/main/java/com/uber"
+    )
+    self.install_files(
+        "src/main/java/com/uber/intellij", f"{sd}/src/main/java/com/uber"
+    )
