@@ -1,0 +1,147 @@
+/* The Chimera Linux unified mimalloc configuration —
+ * hazelesque/musl-mimalloc-introspectable variant.
+ *
+ * Identical to main/musl/files/mimalloc.c except for the
+ * mi_decl_export predefine just below: it forces mimalloc's
+ * public mi_* API to default visibility (instead of file-static)
+ * so the resulting libc-mimalloc-introspectable.so.1 actually
+ * exports mi_stats_print_out, mi_collect, mi_process_info, etc.
+ *
+ * Requires the patches/mimalloc-allow-mi-export.patch fix that
+ * makes mimalloc.h's `#define mi_decl_export static` (which
+ * unconditionally fires under MI_LIBC_BUILD) `#ifndef`-guarded,
+ * so this caller-side predefine actually wins. */
+
+/* enable our changes */
+#define MI_LIBC_BUILD 1
+/* override the MI_LIBC_BUILD default of `static` for mimalloc's
+ * public API symbols — see patches/mimalloc-allow-mi-export.patch.
+ *
+ * `used`+`retain` are necessary because musl's libc.so link uses
+ * `-Wl,--gc-sections` and nothing inside libc references the
+ * mimalloc public API (the libc-internal entry points hit
+ * mimalloc through __libc_* glue, not mi_*).  Without the
+ * retain attribute, --gc-sections drops every mi_* function
+ * regardless of dynamic.list saying we want to export them.
+ *
+ * `retain` requires clang 13+ / gcc 11+; Chimera's clang 22 is
+ * fine.  It sets SHF_GNU_RETAIN on the per-function section
+ * (paired with -ffunction-sections in musl's CFLAGS), so
+ * --gc-sections preserves the section and the dynamic-list
+ * `mi_*;` entry actually gets symbols to export. */
+#define mi_decl_export __attribute__((visibility("default"), used, retain))
+/* the libc malloc should not read any env vars */
+#define MI_NO_GETENV 1
+/* disable process constructor stuff */
+#define MI_PRIM_HAS_PROCESS_ATTACH 1
+/* reduce virt memory usage */
+#define MI_DEFAULT_ARENA_RESERVE 64L*1024L
+/* this is a hardened build */
+#define MI_SECURE 4
+/* this would be nice to have, but unfortunately it
+ * makes some things a lot slower (e.g. sort(1) becomes
+ * roughly 2.5x slower) so disable unless we figure out
+ * some way to make it acceptable...
+ */
+#define MI_PADDING 0
+
+/* use smaller segments to accommodate smaller arenas */
+#define MI_SEGMENT_SHIFT (7 + MI_SEGMENT_SLICE_SHIFT)
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
+#include <features.h>
+/* small workaround for musl includes */
+#ifdef weak
+#undef weak
+#endif
+
+#include "pthread_impl.h"
+
+/* since we are internal we can make syscalls more direct (via macros) */
+#include "syscall.h"
+#define madvise __madvise
+#define MADV_DONTNEED POSIX_MADV_DONTNEED
+
+/* some verification whether we can make a valid build */
+#include <stdatomic.h>
+
+#if ATOMIC_LONG_LOCK_FREE != 2 || ATOMIC_CHAR_LOCK_FREE != 2
+#error Words and bytes must always be lock-free in this context
+#endif
+
+/* arena purge timing stuff (may fix later), stats (can patch out) */
+#if ATOMIC_LLONG_LOCK_FREE != 2
+#error 64-bit atomics must be lock-free for now
+#endif
+
+/* the whole mimalloc source */
+#include "static.c"
+
+/* chimera entrypoints */
+
+#define INTERFACE __attribute__((visibility("default")))
+
+extern int __malloc_replaced;
+extern int __aligned_alloc_replaced;
+
+void * const __malloc_tls_default = (void *)&_mi_heap_empty;
+
+void __malloc_init(pthread_t p) {
+    _mi_auto_process_init();
+}
+
+void __malloc_tls_teardown(pthread_t p) {
+    /* if we never allocated on it, don't do anything */
+    if (p->malloc_tls == (void *)&_mi_heap_empty)
+        return;
+    /* otherwise finalize the thread and reset */
+    _mi_thread_done(p->malloc_tls);
+    p->malloc_tls = (void *)&_mi_heap_empty;
+}
+
+/* we have nothing to do here, mimalloc is lock-free */
+void __malloc_atfork(int who) {
+    if (who < 0) {
+        /* disable */
+    } else {
+        /* enable */
+    }
+}
+
+/* we have no way to implement this AFAICT */
+void __malloc_donate(char *a, char *b) { (void)a; (void)b; }
+
+void *__libc_calloc(size_t m, size_t n) {
+    return mi_calloc(m, n);
+}
+
+void __libc_free(void *ptr) {
+    mi_free(ptr);
+}
+
+void *__libc_malloc_impl(size_t len) {
+    return mi_malloc(len);
+}
+
+void *__libc_realloc(void *ptr, size_t len) {
+    return mi_realloc(ptr, len);
+}
+
+/* technically mi_aligned_alloc and mi_memalign are the same in mimalloc
+ * which is good for us because musl implements memalign with aligned_alloc
+ */
+INTERFACE void *aligned_alloc(size_t align, size_t len) {
+    if (mi_unlikely(__malloc_replaced && !__aligned_alloc_replaced)) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    void *p = mi_malloc_aligned(len, align);
+    mi_assert_internal(((uintptr_t)p % align) == 0);
+    return p;
+}
+
+INTERFACE size_t malloc_usable_size(void *p) {
+    return mi_usable_size(p);
+}

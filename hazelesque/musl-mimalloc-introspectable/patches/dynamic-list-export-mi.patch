@@ -1,0 +1,31 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: dynamic.list: export mimalloc public API (mi_*) symbols
+
+musl's libc.so link uses `-Wl,--dynamic-list=dynamic.list` as a
+positive allowlist: only symbols whose names match a pattern in
+dynamic.list end up in the resulting DT_DYNSYM.  By default the
+file lists only POSIX/glibc-compat globals (environ, malloc, free,
+optarg, …); mimalloc's mi_* public API is not on it.
+
+Add a single `mi_*;` glob.  This catches the 155 mi_*-prefixed
+symbols at GLOBAL DEFAULT visibility in mimalloc.o (mimalloc's
+documented public API, tagged `mi_decl_export = visibility("default")`
+via the variant shim + mimalloc-allow-mi-export.patch).  The 66
+internal mi_*-prefixed symbols are file-static (lowercase 't' in
+nm output) and cannot be exported regardless of dynamic.list, so
+the glob has no risk of leaking internals.
+
+Hazelesque-only patch — main/musl/ deliberately doesn't expose
+the mi_* surface.
+
+diff --git a/dynamic.list b/dynamic.list
+--- a/dynamic.list
++++ b/dynamic.list
+@@ -38,4 +38,7 @@ __progname;
+ __progname_full;
+
+ __stack_chk_guard;
++
++/* hazelesque/musl-mimalloc-introspectable: mimalloc public API */
++mi_*;
+ };

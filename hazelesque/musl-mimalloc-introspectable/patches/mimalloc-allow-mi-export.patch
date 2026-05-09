@@ -1,0 +1,39 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: mimalloc.h: allow caller to override mi_decl_export under MI_LIBC_BUILD
+
+In the upstream main/musl build, mimalloc is compiled with
+MI_LIBC_BUILD=1, which makes mimalloc.h define mi_decl_export
+unconditionally as `static`.  This collapses the entire mimalloc
+public API (mi_malloc, mi_stats_print_out, mi_collect, etc.) to
+file-static visibility, so even nm on the resulting .o sees them
+as lowercase 't' (local) — they cannot be exported from
+libc.so no matter how the link is configured.
+
+For the hazelesque/musl-mimalloc-introspectable variant we want
+to expose mimalloc's introspection API as proper dynamic symbols.
+Making the `static` definition `#ifndef`-guarded lets the variant's
+mimalloc.c shim predefine `mi_decl_export` to
+`__attribute__((visibility("default")))` before the include cascade
+reaches mimalloc.h.
+
+Behaviour for existing builds (main/musl) is unchanged: they don't
+predefine mi_decl_export, so the `static` define still wins.
+
+This patch is hazelesque-only — main/musl/ does not need it.
+
+diff --git a/mimalloc/include/mimalloc.h b/mimalloc/include/mimalloc.h
+--- a/mimalloc/include/mimalloc.h
++++ b/mimalloc/include/mimalloc.h
+@@ -60,8 +60,11 @@
+   #define mi_attr_alloc_size2(s1,s2)
+   #define mi_attr_alloc_align(p)
+ #elif defined(__GNUC__)                 // includes clang and icc
+-  #ifdef MI_LIBC_BUILD
++  #if defined(MI_LIBC_BUILD) && !defined(mi_decl_export)
+     #define mi_decl_export static
++  #elif defined(MI_LIBC_BUILD)
++    /* caller predefined mi_decl_export — keep their definition.
++       Used by hazelesque/musl-mimalloc-introspectable. */
+   #elif defined(MI_SHARED_LIB) && defined(MI_SHARED_LIB_EXPORT)
+     #define mi_decl_export              __attribute__((visibility("default")))
+   #else

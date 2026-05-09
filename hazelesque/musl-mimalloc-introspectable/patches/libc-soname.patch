@@ -1,0 +1,33 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: Makefile: set libc-mimalloc-introspectable.so.1 SONAME at link time
+
+We need libc.so's DT_SONAME to advertise the variant name so
+binaries linked against this variant DT_NEED that name (and
+can't silently fall back to system libc).
+
+The previous approach used `patchelf --set-soname` in post_install
+after the upstream link finished.  That worked SONAME-wise but
+left the binary segfaulting on direct invocation as a loader
+(`ld-musl-mimalloc-introspectable-x86_64.so.1 --version`).
+Inspection showed the variant had 11 program headers vs vanilla
+musl's 10, with an extra GNU_EH_FRAME — patchelf had relocated
+data and added segments to fit the longer SONAME string, which
+broke musl's static-PIE startup path that's sensitive to ELF
+layout.
+
+Setting the SONAME at link time instead gives a clean ELF with
+the same layout as vanilla.  Also drops patchelf as a
+hostmakedepend.
+
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -170,7 +170,7 @@ obj/%.lo: $(srcdir)/%.c $(GENH) $(IMPH)
+
+ lib/libc.so: $(LOBJS) $(LDSO_OBJS) $(EXTRA_OBJ)
+ 	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -nostdlib -shared \
+-	-Wl,-e,_dlstart -o $@ $(LOBJS) $(LDSO_OBJS) $(LIBCC)
++	-Wl,-e,_dlstart -Wl,-soname=libc-mimalloc-introspectable.so.1 -o $@ $(LOBJS) $(LDSO_OBJS) $(LIBCC)
+
+ lib/libc.a: $(AOBJS) $(EXTRA_OBJ)
+ 	rm -f $@
