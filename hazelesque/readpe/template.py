@@ -5,8 +5,8 @@ build_style = "makefile"
 make_build_args = ["prefix=/usr"]
 make_install_args = ["prefix=/usr"]
 makedepends = [
-    "openssl3-devel",
     "linux-headers",
+    "openssl3-devel",
 ]
 depends = [
     "openssl3-libs",

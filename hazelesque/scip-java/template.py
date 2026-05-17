@@ -28,6 +28,7 @@
 # the maven cache into source = [...] entries for sealed offline
 # builds.
 
+broken = "scip-java does not build yet"
 pkgname = "scip-java"
 pkgver = "0.12.3"
 pkgrel = 0

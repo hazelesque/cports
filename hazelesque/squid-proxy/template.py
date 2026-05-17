@@ -24,13 +24,14 @@ configure_gen = []
 makedepends = [
     "autoconf",
     "automake",
-    "libtool",
-    "libtool-devel",
-    "gawk",
-    ##"ed", # ed is included in chimerautils
     "chimerautils",
     "cppunit",
     "cppunit-devel",
+    "dinit-chimera",
+    "gawk",
+    "libtool",
+    "libtool-devel",
+    ##"ed", # ed is included in chimerautils
 ##    "argp-standalone",
 ##    "bzip2-devel",
 ##    "chimerautils-devel",

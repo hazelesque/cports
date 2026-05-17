@@ -1,3 +1,4 @@
+broken = "make check Tools test fails"
 pkgname = "msitools"
 pkgver = "0.106"
 pkgrel = 0
@@ -13,28 +14,28 @@ hostmakedepends = [
     "pkgconf",
 ]
 makedepends = [
-    "meson",
-    "vala",
-    "perl",
+    "bash",
     "bison",
     "cmake",
-    "glib-devel",
-    "libgsf-devel",
     "gcab-devel",
+    "git",
+    "glib-devel",
     "gobject-introspection",
     "gobject-introspection-devel",
-    "bash",
-    "git",
-    ##"openssl3-devel",
+    "libgsf-devel",
+    "meson",
+    "perl",
+    "vala",
     ##"linux-headers",
+    ##"openssl3-devel",
 ]
 depends = [
-    ##"openssl3-libs",
-    "glib",
-    "libgsf",
     "gcab",
+    "glib",
     "gobject-introspection",
     "gobject-introspection-libs",
+    "libgsf",
+    ##"openssl3-libs",
 ]
 pkgdesc = "Windows Installer file manipulation tool"
 license = "LGPL-2.1-or-later"

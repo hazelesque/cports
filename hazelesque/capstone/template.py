@@ -19,7 +19,7 @@ makedepends = [
 ]
 depends = [
 ]
-pkgdesc = "Disassembly framework with the target of becoming the ultimate disasm engine for binary analysis and reversing in the security community"
+pkgdesc = "Disassembly framework for binary analysis and reversing"
 license = "BSD-2-Clause AND LGPL-3.0-or-later AND GPL-2.0-or-later"
 url = "http://www.capstone-engine.org"
 source = [

@@ -1,3 +1,4 @@
+broken = "Issue with upstream tarball"
 pkgname = "icoutils"
 pkgver = "0.32.3"
 pkgrel = 0
@@ -47,7 +48,7 @@ url = "https://www.nongnu.org/icoutils"
 source = (
     f"http://savannah.nongnu.org/download/icoutils/icoutils-{pkgver}.tar.bz2"
 )
-sha256 = "17abe02d043a253b68b47e3af69c9fc755b895db68fdc8811786125df564c6e0"
+sha256 = "6eb4c9c23fe9d19ecf6c90e4a4d66888f7cf648dca845867dea647fde8192db3"
 tool_flags = {
 ##    "CFLAGS": ["-D_GNU_SOURCE", "-Wno-unaligned-access"],
 ##    "LDFLAGS": ["-Wl,-z,stack-size=2097152"],

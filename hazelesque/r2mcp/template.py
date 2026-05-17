@@ -38,8 +38,8 @@ hostmakedepends = [
     "pkgconf",
 ]
 makedepends = [
-    "radare2",
     "capstone-devel",
+    "radare2",
 ##    "openssl3-devel",
 ##    "linux-headers",
 ##    "libpng-devel",
