@@ -1,0 +1,7 @@
+type = process
+command = /usr/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+run-as = _caddy
+working-dir = /var/lib/caddy
+depends-on = local.target
+restart = true
+smooth-recovery = true

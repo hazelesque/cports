@@ -1,0 +1,73 @@
+# Caddy config — example pointing at withy's two instances.
+# Edit /etc/caddy/Caddyfile and replace this with the real one.
+#
+# Two virtual hosts, one per withy instance.  ACME via DNS
+# challenge (operator picks provider + credentials per-zone);
+# see https://github.com/caddy-dns/<provider> for the
+# provider-specific config keys.
+#
+# basic_auth gates write actions for the demo instance —
+# share the password with friends who can play with it.
+# Remove the basic_auth block when authn moves into withy
+# proper (Kanidm / Biscuits work).
+
+# ----- demo instance -----
+demo.example.com {
+    tls {
+        # Replace with your DNS provider config.
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+
+    # Mild rate limit so a random visitor can't trivially DoS
+    # the SSE channel.  Per-IP, sliding window.
+    # (requires the caddy-ratelimit module — add to
+    # dns_modules in the template + rebuild.)
+    # rate_limit {
+    #     zone demo_global {
+    #         key {remote_host}
+    #         events 120
+    #         window 1m
+    #     }
+    # }
+
+    # Optional: basic_auth gate on all paths.
+    # basic_auth {
+    #     hazel $2a$14$...bcrypt-hash...
+    # }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "same-origin"
+    }
+
+    reverse_proxy https://127.0.0.1:8455 {
+        # withy-web terminates TLS with its dev-CA cert;
+        # caddy verifies via the CA bundle.  Adjust the
+        # `trusted_pool` path per your deployment.
+        transport http {
+            tls_trusted_ca_certs /srv/data/demo/withy/etc/ca.crt
+            tls_server_name 127.0.0.1
+        }
+    }
+}
+
+# ----- staging instance -----
+staging.example.com {
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "same-origin"
+    }
+
+    reverse_proxy https://127.0.0.1:8465 {
+        transport http {
+            tls_trusted_ca_certs /srv/data/staging/withy/etc/ca.crt
+            tls_server_name 127.0.0.1
+        }
+    }
+}
