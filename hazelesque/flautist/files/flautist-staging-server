@@ -1,0 +1,7 @@
+type = process
+command = /usr/libexec/flautist/wrap-bwrap.sh /srv/data/staging/flautist /srv/data/staging/flautist/etc -- serve --repo /srv/data/staging/flautist/repo --listen 127.0.0.1:9565 --management-port 8565 --auth-acl-path /srv/data/staging/flautist/etc/auth-acl.toml --server-cert /srv/data/staging/flautist/etc/server.crt --server-key /srv/data/staging/flautist/etc/server.key --ca-bundle /srv/data/staging/flautist/etc/ca.crt
+run-as = _flautist-staging
+working-dir = /srv/data/staging/flautist
+depends-on = local.target
+restart = true
+smooth-recovery = true

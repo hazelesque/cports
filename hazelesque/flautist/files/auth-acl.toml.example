@@ -1,0 +1,72 @@
+# flautist auth-acl.toml — example / template.
+#
+# Copy this file to your instance's etc dir + edit as needed:
+#
+#     cp /usr/share/flautist/auth-acl.toml.example \
+#        /srv/data/demo/flautist/etc/auth-acl.toml
+#     chown _flautist-demo:_flautist-demo \
+#        /srv/data/demo/flautist/etc/auth-acl.toml
+#     chmod 0640 /srv/data/demo/flautist/etc/auth-acl.toml
+#
+# An ABSENT auth-acl.toml fails f7 serve's startup (fail-closed
+# per **D6**); an EMPTY-but-present file (i.e. this file with
+# everything commented out) is permitted — it just means "no
+# write paths are authorised".  Read paths (WatchCls, GetCl,
+# the things withy-server needs for its CardLinked deriver)
+# are gated by mTLS alone and don't consult this ACL.
+#
+# So: for a withy-only demo, leave everything below commented
+# out.  Add `[[fork_grant]]` / `[[nomination_grant]]` rows
+# only when bringing up xref-daemon, ci-daemon, build-daemon,
+# etc. against this flautist instance.
+
+# ------------------------------------------------------------
+# [[fork_grant]] — authorise a principal to submit forks under
+# a specific fork-name keyspace (post-Phase-2b shape; legacy
+# `fork-acl.toml` still loaded with a deprecation warn).
+#
+# fork_name:    the fork-name keyspace.  Today's xref-daemon
+#               uses "scip"; build-daemon uses "build-artefacts"
+#               etc.  String, free-form.
+# principal:    the principal-name the submitter signs requests
+#               as (per hazelesque-auth's Principal type).
+# auth.method:  "ed25519" (only method supported at v0.0.4;
+#               "mtls" is reserved but rejected by the loader).
+# auth.pubkey:  hex-encoded ed25519 verifying key (64 hex chars,
+#               32 bytes raw).  Read out of an existing identity
+#               via `f7 keys show --principal <name>` on the
+#               host running the agent.
+# parent_kinds: optional list, defaults to ["Cl"].  Add
+#               "Snapshot" to authorise pre-submit fork
+#               submission (Phase 3 ci-daemon use case).
+#
+# Example: allow the xref-daemon principal "xref-generator" to
+# submit forks under the "scip" keyspace, CL-parent only.
+# ------------------------------------------------------------
+
+#[[fork_grant]]
+#fork_name = "scip"
+#principal = "xref-generator"
+#auth = { method = "ed25519", pubkey = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" }
+#parent_kinds = ["Cl"]
+
+
+# ------------------------------------------------------------
+# [[nomination_grant]] — authorise a principal to call
+# Nominate(workflow_id) against a workspace.  Companion to the
+# `[[fork_grant]]` above: the signature on a Nominate call is
+# gated by an `Allowlist` lookup (same ed25519 key as the
+# fork_grant), but the *workspace match* is gated here.
+#
+# principal:  same principal-name as the matching Allowlist
+#             entry.
+# workspaces: list of workspace-name patterns.  An empty list
+#             (or omitting the field) means match-all.  Pattern
+#             matching is the Nominate handler's job — see
+#             flautist-server/src/nomination_service.rs for
+#             the supported syntax.
+# ------------------------------------------------------------
+
+#[[nomination_grant]]
+#principal = "ci-driver"
+#workspaces = ["main", "release/*"]
