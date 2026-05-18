@@ -1,0 +1,7 @@
+type = process
+command = /usr/libexec/withy/wrap-bwrap.sh /srv/data/staging/withy /srv/data/staging/withy/etc -- browse --backend https://127.0.0.1:9265 --user-listen 127.0.0.1:8465 --mgmt-listen 127.0.0.1:8466 --web-cert /srv/data/staging/withy/etc/web.crt --web-key /srv/data/staging/withy/etc/web.key --web-ca /srv/data/staging/withy/etc/ca.crt
+run-as = _withy-staging
+working-dir = /srv/data/staging/withy
+depends-on = withy-staging-server
+restart = true
+smooth-recovery = true

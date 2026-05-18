@@ -1,0 +1,7 @@
+type = process
+command = /usr/libexec/withy/wrap-bwrap.sh /srv/data/staging/withy /srv/data/staging/withy/etc -- serve --db /srv/data/staging/withy/db/withy.db --grpc 127.0.0.1:9265 --mgmt 127.0.0.1:8265 --server-cert /srv/data/staging/withy/etc/server.crt --server-key /srv/data/staging/withy/etc/server.key --server-ca /srv/data/staging/withy/etc/ca.crt --flautist-url https://127.0.0.1:9565 --flautist-client-cert /srv/data/staging/withy/etc/server.crt --flautist-client-key /srv/data/staging/withy/etc/server.key --flautist-ca /srv/data/staging/withy/etc/ca.crt --flautist-cache /srv/data/staging/withy/flautist-cache
+run-as = _withy-staging
+working-dir = /srv/data/staging/withy
+depends-on = local.target
+restart = true
+smooth-recovery = true

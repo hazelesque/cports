@@ -1,0 +1,7 @@
+type = process
+command = /usr/libexec/withy/wrap-bwrap.sh /srv/data/demo/withy /srv/data/demo/withy/etc -- browse --backend https://127.0.0.1:9255 --user-listen 127.0.0.1:8455 --mgmt-listen 127.0.0.1:8456 --web-cert /srv/data/demo/withy/etc/web.crt --web-key /srv/data/demo/withy/etc/web.key --web-ca /srv/data/demo/withy/etc/ca.crt
+run-as = _withy-demo
+working-dir = /srv/data/demo/withy
+depends-on = withy-demo-server
+restart = true
+smooth-recovery = true
