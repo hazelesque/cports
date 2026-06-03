@@ -1,13 +1,13 @@
 {
-    "description": "UEFI firmware for riscv64 (qcow2 NVRAM)",
+    "description": "UEFI firmware for riscv64 (qcow2 pflash)",
     "interface-types": [
         "uefi"
     ],
     "mapping": {
         "device": "flash",
         "executable": {
-            "filename": "/usr/share/qemu/edk2-riscv-code.fd",
-            "format": "raw"
+            "filename": "/usr/share/qemu/edk2-riscv-code.qcow2",
+            "format": "qcow2"
         },
         "nvram-template": {
             "filename": "/usr/share/qemu/edk2-riscv-vars.qcow2",

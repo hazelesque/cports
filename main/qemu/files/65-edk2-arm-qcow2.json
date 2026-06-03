@@ -1,13 +1,13 @@
 {
-    "description": "UEFI firmware for arm (qcow2 NVRAM)",
+    "description": "UEFI firmware for arm (qcow2 pflash)",
     "interface-types": [
         "uefi"
     ],
     "mapping": {
         "device": "flash",
         "executable": {
-            "filename": "/usr/share/qemu/edk2-arm-code.fd",
-            "format": "raw"
+            "filename": "/usr/share/qemu/edk2-arm-code.qcow2",
+            "format": "qcow2"
         },
         "nvram-template": {
             "filename": "/usr/share/qemu/edk2-arm-vars.qcow2",

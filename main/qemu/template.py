@@ -1,6 +1,6 @@
 pkgname = "qemu"
 pkgver = "11.0.1"
-pkgrel = 1
+pkgrel = 2
 build_style = "gnu_configure"
 # TODO vde
 configure_args = [
@@ -162,16 +162,38 @@ def post_install(self):
         self.uninstall("usr/lib/qemu/s390-ccw.img")
         self.uninstall("usr/lib/qemu/openbios-sparc64")
 
-    # Generate qcow2 NVRAM vars templates alongside the raw ones so
+    # Generate qcow2 pflash siblings (both the read-only code and
+    # the writable vars template) alongside the raw .fd originals so
     # libvirt's auto-firmware can serve `<nvram format='qcow2'/>`
-    # requests. Internal qcow2 snapshots of UEFI guests require
-    # qcow2-format pflash files (the libvirt error if you try
-    # against raw pflash: "internal snapshots of a VM with pflash
-    # based firmware require QCOW2 nvram format"). The raw templates
-    # stay in place untouched — same-content re-encoding, no
-    # functional change for guests not asking for qcow2.
+    # requests. Internal qcow2 snapshots of UEFI guests require all
+    # pflash files to be qcow2 (the libvirt error against raw pflash
+    # is "internal snapshots of a VM with pflash based firmware
+    # require QCOW2 nvram format").
+    #
+    # **Both code and vars need re-encoding.** libvirt's matcher
+    # (`qemuFirmwareMatchDomain` in src/qemu/qemu_firmware.c) treats
+    # the loader/executable and the nvram-template as a single
+    # "flash" pair and rejects descriptors with mismatched formats
+    # — "Discarding loader with mismatching flash format 'raw' !=
+    # 'qcow2'" — even when the domain XML only constrains the
+    # nvram side. So shipping qcow2 vars alongside raw code is
+    # insufficient on its own; the code has to come along too.
+    #
+    # The raw .fd files stay in place untouched — same-content
+    # re-encoding, no functional change for guests not opting into
+    # qcow2.
     fw = self.chroot_destdir / "usr/lib/qemu"
-    for vars_name in (
+    for stem in (
+        # Read-only code blobs:
+        "edk2-i386-code",
+        "edk2-i386-secure-code",
+        "edk2-x86_64-code",
+        "edk2-x86_64-secure-code",
+        "edk2-aarch64-code",
+        "edk2-arm-code",
+        "edk2-loongarch64-code",
+        "edk2-riscv-code",
+        # Writable NVRAM templates:
         "edk2-i386-vars",
         "edk2-arm-vars",
         "edk2-loongarch64-vars",
@@ -179,7 +201,7 @@ def post_install(self):
     ):
         # Skip variants that didn't get installed for this profile
         # (e.g. 32-bit hosts where some arches are pruned above).
-        if not (self.destdir / "usr/lib/qemu" / f"{vars_name}.fd").exists():
+        if not (self.destdir / "usr/lib/qemu" / f"{stem}.fd").exists():
             continue
         self.do(
             self.chroot_cwd / "build/qemu-img",
@@ -188,8 +210,8 @@ def post_install(self):
             "raw",
             "-O",
             "qcow2",
-            fw / f"{vars_name}.fd",
-            fw / f"{vars_name}.qcow2",
+            fw / f"{stem}.fd",
+            fw / f"{stem}.qcow2",
         )
 
     # Sibling firmware descriptors pointing at the qcow2 vars
