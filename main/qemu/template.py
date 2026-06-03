@@ -1,6 +1,6 @@
 pkgname = "qemu"
 pkgver = "11.0.1"
-pkgrel = 0
+pkgrel = 1
 build_style = "gnu_configure"
 # TODO vde
 configure_args = [
@@ -161,6 +161,60 @@ def post_install(self):
         self.uninstall("usr/lib/qemu/opensbi-riscv64-generic-fw_dynamic.bin")
         self.uninstall("usr/lib/qemu/s390-ccw.img")
         self.uninstall("usr/lib/qemu/openbios-sparc64")
+
+    # Generate qcow2 NVRAM vars templates alongside the raw ones so
+    # libvirt's auto-firmware can serve `<nvram format='qcow2'/>`
+    # requests. Internal qcow2 snapshots of UEFI guests require
+    # qcow2-format pflash files (the libvirt error if you try
+    # against raw pflash: "internal snapshots of a VM with pflash
+    # based firmware require QCOW2 nvram format"). The raw templates
+    # stay in place untouched — same-content re-encoding, no
+    # functional change for guests not asking for qcow2.
+    fw = self.chroot_destdir / "usr/lib/qemu"
+    for vars_name in (
+        "edk2-i386-vars",
+        "edk2-arm-vars",
+        "edk2-loongarch64-vars",
+        "edk2-riscv-vars",
+    ):
+        # Skip variants that didn't get installed for this profile
+        # (e.g. 32-bit hosts where some arches are pruned above).
+        if not (self.destdir / "usr/lib/qemu" / f"{vars_name}.fd").exists():
+            continue
+        self.do(
+            self.chroot_cwd / "build/qemu-img",
+            "convert",
+            "-f",
+            "raw",
+            "-O",
+            "qcow2",
+            fw / f"{vars_name}.fd",
+            fw / f"{vars_name}.qcow2",
+        )
+
+    # Sibling firmware descriptors pointing at the qcow2 vars
+    # templates. Numbering preserves precedence: 55- pairs with the
+    # existing 50- secure-boot descriptors, 65- pairs with the
+    # non-secure 60- ones. Default-format `<nvram>` requests still
+    # match the existing raw descriptors first (lexicographic
+    # iteration); qcow2 entries only match when an XML explicitly
+    # requests `<nvram format='qcow2'/>`. See
+    # https://libvirt.org/formatdomain.html#bios-bootloader for
+    # libvirt's auto-firmware selection algorithm.
+    for descriptor in (
+        "55-edk2-i386-secure-qcow2.json",
+        "55-edk2-x86_64-secure-qcow2.json",
+        "65-edk2-aarch64-qcow2.json",
+        "65-edk2-arm-qcow2.json",
+        "65-edk2-i386-qcow2.json",
+        "65-edk2-loongarch64-qcow2.json",
+        "65-edk2-riscv64-qcow2.json",
+        "65-edk2-x86_64-qcow2.json",
+    ):
+        self.install_file(
+            self.files_path / descriptor,
+            "usr/lib/qemu/firmware",
+        )
 
 
 @subpackage("qemu-guest-agent")
