@@ -1,0 +1,7 @@
+type = process
+command = /usr/bin/pkg6depotd -c /srv/data/pkg-mirror/etc/pkg6depotd.kdl
+run-as = _pkg6depotd
+working-dir = /srv/data/pkg-mirror
+depends-on = local.target
+restart = true
+smooth-recovery = true

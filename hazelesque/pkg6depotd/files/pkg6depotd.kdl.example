@@ -1,0 +1,29 @@
+// pkg6depotd — local IPS mirror depot for the OmniOS sandbox VMs.
+//
+// Copy to /srv/data/pkg-mirror/etc/pkg6depotd.kdl and edit.
+// The repository root is a CLASSIC pkg5 repo populated by
+// pkg5's pkgrecv (NOT pkg6recv — it re-hashes payloads and
+// breaks classic clients; see
+// scm-infra/kajiya/spikes/pkg-depot-investigation.md):
+//
+//   pkgrecv -s https://pkg.omnios.org/r151058/core/ \
+//           -d /srv/data/pkg-mirror/repo <pkg ...|'entire'>
+//
+// Bind to the libvirt sandbox gateways so VMs reach it; IPS
+// content is hash-verified by the client, so plain HTTP is
+// sound for a LAN mirror.
+
+server {
+    bind "192.168.171.1:10000"
+    workers 4
+}
+
+repository {
+    root "/srv/data/pkg-mirror/repo"
+    mode "readonly"
+}
+
+telemetry {
+    service-name "pkg6depotd"
+    log-format "json"
+}
