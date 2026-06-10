@@ -1,0 +1,123 @@
+diff --git a/src/depot.py b/src/depot.py
+index f5bddefc..3d87697b 100755
+--- a/src/depot.py
++++ b/src/depot.py
+@@ -257,8 +257,7 @@ class OptionError(Exception):
+ if __name__ == "__main__":
+ 
+         setlocale(locale.LC_ALL, "")
+-        gettext.install("pkg", "/usr/share/locale",
+-            codeset=locale.getpreferredencoding())
++        gettext.install("pkg", "/usr/share/locale")  # spike: codeset kwarg removed py3.11
+ 
+         add_content = False
+         exit_ready = False
+diff --git a/src/modules/client/transport/transport.py b/src/modules/client/transport/transport.py
+index e757ad8e..2dd20371 100644
+--- a/src/modules/client/transport/transport.py
++++ b/src/modules/client/transport/transport.py
+@@ -728,8 +728,15 @@ class Transport(object):
+                 if self.__cadir is None:
+                         # If transport isn't connected to image, or no
+                         # ca-dir is specified, fallback to this one.
++                        # spike: try Linux CA dir locations before the
++                        # illumos default.
+                         fb_cadir = os.path.join(os.path.sep, "etc",
+                             "openssl", "certs")
++                        for cand in ("/etc/ssl/certs",
++                            "/etc/openssl/certs"):
++                                if os.path.exists(cand):
++                                        fb_cadir = cand
++                                        break
+ 
+                         try:
+                                 cadir = self.cfg.get_property("ca-path")
+diff --git a/src/modules/portable/util.py b/src/modules/portable/util.py
+index 1cf1f334..0a9d8060 100644
+--- a/src/modules/portable/util.py
++++ b/src/modules/portable/util.py
+@@ -51,8 +51,9 @@ def get_canonical_os_name():
+                 return psl
+ 
+         if psl == 'linux':
+-                # add distro information for Linux
+-                return 'linux_{0}'.format(platform.dist()[0])
++                # platform.dist() was removed in Python 3.8; the distro
++                # name was only ever cosmetic here.  (spike patch)
++                return 'linux'
+ 
+         # Workaround for python bug 1082, on Vista, platform.system()
+         # returns 'Microsoft'
+diff --git a/src/pkgrepo.py b/src/pkgrepo.py
+index 3d14d89b..fa16103c 100755
+--- a/src/pkgrepo.py
++++ b/src/pkgrepo.py
+@@ -2364,12 +2364,11 @@ def handle_errors(func, *args, **kwargs):
+ 
+ if __name__ == "__main__":
+         misc.setlocale(locale.LC_ALL, "", error)
+-        gettext.install("pkg", "/usr/share/locale",
+-            codeset=locale.getpreferredencoding())
++        gettext.install("pkg", "/usr/share/locale")  # spike: codeset kwarg removed py3.11
+         misc.set_fd_limits(printer=error)
+ 
+         # Make all warnings be errors.
+-        warnings.simplefilter('error')
++        warnings.simplefilter('default')  # spike: py3.14 deprecations are not errors
+         if six.PY3:
+                 # disable ResourceWarning: unclosed file
+                 warnings.filterwarnings("ignore", category=ResourceWarning)
+diff --git a/src/publish.py b/src/publish.py
+index bd492229..c0b24413 100755
+--- a/src/publish.py
++++ b/src/publish.py
+@@ -847,7 +847,7 @@ if __name__ == "__main__":
+         misc.set_fd_limits(printer=error)
+ 
+         # Make all warnings be errors.
+-        warnings.simplefilter('error')
++        warnings.simplefilter('default')  # spike: py3.14 deprecations are not errors
+         if six.PY3:
+                 # disable ResourceWarning: unclosed file
+                 warnings.filterwarnings("ignore", category=ResourceWarning)
+diff --git a/src/pull.py b/src/pull.py
+index 8e4a7332..5d2fcdd2 100755
+--- a/src/pull.py
++++ b/src/pull.py
+@@ -1723,12 +1723,11 @@ def transfer_pkgs(pargs, target, list_newest, all_versions, all_timestamps,
+ 
+ if __name__ == "__main__":
+         misc.setlocale(locale.LC_ALL, "", error)
+-        gettext.install("pkg", "/usr/share/locale",
+-            codeset=locale.getpreferredencoding())
++        gettext.install("pkg", "/usr/share/locale")  # spike: codeset kwarg removed py3.11
+         misc.set_fd_limits(printer=error)
+ 
+         # Make all warnings be errors.
+-        warnings.simplefilter('error')
++        warnings.simplefilter('default')  # spike: py3.14 deprecations are not errors
+         import six
+         if six.PY3:
+                 # disable ResourceWarning: unclosed file
+diff --git a/src/setup.py b/src/setup.py
+index e5f38b2f..62023858 100755
+--- a/src/setup.py
++++ b/src/setup.py
+@@ -106,7 +106,7 @@ cffi_dir = os.path.normpath(os.path.join(pwd, "cffi_src"))
+ 
+ # Extract Python minor version.
+ py_version = '.'.join(platform.python_version_tuple()[:2])
+-assert py_version in ('3.9')
++assert py_version in ('3.9', '3.14')  # spike: allow 3.14
+ py_install_dir = 'usr/lib/python' + py_version + '/vendor-packages'
+ 
+ py64_executable = '/usr/bin/python' + py_version
+@@ -1377,7 +1377,7 @@ class Extension(distutils.core.Extension):
+ # These are set to real values based on the platform, down below
+ compile_args = None
+ if osname in ("sunos", "linux", "darwin"):
+-        compile_args = [ "-O3", "-D__EXTENSIONS__", "-Werror" ]
++        compile_args = [ "-O3", "-D__EXTENSIONS__" ]  # spike: -Werror dropped (clang 21 vs 2008-era C)
+         link_args = []
+ 
+ ext_modules = [

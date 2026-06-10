@@ -1,0 +1,114 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: gate C extensions and locale data for Linux builds
+
+On Linux the upstream ext_modules list builds the `elf` extension,
+whose Linux port has bit-rotted (Solaris uint_t, DT_SUNW_FILTER,
+Solaris SHA2_CTX/SHA256Update API); every import of pkg.elf outside
+the pkgdepend machinery is try/except-guarded, so the mirror tools
+(pkgrecv/pkgrepo) do not need it.  Conversely `_syscallat` -- plain
+POSIX *at(2) calls, compiles fine on musl -- is gated to Solaris
+upstream but sits unconditionally on the pkgrecv import chain
+(transport -> imageconfig -> linkedimage -> altroot -> pkg.syscallat).
+
+Swap the two: elf becomes sunos-only, _syscallat gains a Linux build.
+
+Also gate the cffi build-script runner in build_py to the scripts
+relevant on this platform, and actually wait for them -- upstream
+fires them off with Popen and never wait()s, so build_ext could race
+the generated .c files.
+
+Finally, skip build_data outside sunos: the .mo/.pot machinery is
+hardcoded at Solaris tool paths (/usr/gnu/bin/xgettext,
+intltool-update) and the locale files it produces are only delivered
+by the sunos-only data_files list anyway.
+
+See scm-infra/kajiya/spikes/pkg-depot-investigation.md section 1 for
+the per-extension verification notes.
+
+diff --git a/src/setup.py b/src/setup.py
+--- a/src/setup.py
++++ b/src/setup.py
+@@ -1126,15 +1126,26 @@
+                 for path in os.listdir(cffi_dir):
+                         if not path.startswith("build_"):
+                                 continue
++                        # On Linux only _syscallat is built; the other
++                        # cffi extensions (_arch, _pspawn, _sysattr,
++                        # _sha512_t) are Solaris-only and their build
++                        # scripts fail to compile here.
++                        if osname != 'sunos' and path != "build_syscallat.py":
++                                continue
+                         path = os.path.join(cffi_dir, path)
+                         # make scripts executable
+                         os.chmod(path,
+                             os.stat(path).st_mode
+                             | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+ 
+-                        # run the scripts
++                        # run the scripts; wait so the generated .c
++                        # files exist before build_ext compiles them
++                        # (upstream fired these off without waiting).
+                         p = subprocess.Popen(
+                             [sys.executable, path])
++                        if p.wait() != 0:
++                                raise DistutilsError(
++                                    "cffi build script failed: " + path)
+ 
+                 return ret
+ 
+@@ -1234,6 +1245,12 @@
+                 pass
+ 
+         def run(self):
++                # The locale data built here is only delivered by the
++                # sunos data_files list, and the i18n tools are
++                # hardcoded at Solaris paths (/usr/gnu/bin/xgettext);
++                # skip the whole step elsewhere.
++                if osname != 'sunos':
++                        return
+                 # Anything that gets created here should get deleted in
+                 # clean_func.run() below.
+                 i18n_check()
+@@ -1489,9 +1506,14 @@
+                 [('po/pkg.pot', 'pkg.pot')])
+         ]
+ 
+-if osname == 'sunos' or osname == "linux":
++if osname == 'sunos':
+         # Unix platforms which the elf extension has been ported to
+-        # are specified here, so they are built automatically
++        # are specified here, so they are built automatically.
++        # Linux is excluded: the Linux port of the elf extension has
++        # bit-rotted (Solaris uint_t, DT_SUNW_FILTER, Solaris SHA2
++        # API) and every importer of pkg.elf except the pkgdepend
++        # machinery guards the import with try/except, so it is not
++        # needed for the mirror tools (pkgrecv/pkgrepo).
+         elf_libraries = ['elf']
+         ext_modules += [
+                 Extension(
+@@ -1562,6 +1584,25 @@
+                     ]
+         else:
+             elf_libraries += [ 'ssl' ]
++
++if osname == "linux":
++        # _syscallat is plain POSIX *at(2) calls and sits on the
++        # pkgrecv import chain (transport -> imageconfig ->
++        # linkedimage -> altroot imports pkg.syscallat
++        # unconditionally); upstream merely forgot to list it for
++        # Linux.  The remaining cffi extensions (_arch, _pspawn,
++        # _sysattr, _sha512_t) are Solaris-only and stay gated.
++        ext_modules += [
++                Extension(
++                        '_syscallat',
++                        syscallat_srcs,
++                        include_dirs = include_dirs,
++                        extra_compile_args = compile_args,
++                        extra_link_args = link_args,
++                        define_macros = [('_FILE_OFFSET_BITS', '64')],
++                        build_64 = True
++                        ),
++                ]
+ 
+ setup(cmdclass = cmdclasses,
+     name = 'pkg',

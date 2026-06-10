@@ -1,0 +1,62 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: setup.py: support building from a plain source tarball (no VCS)
+
+build_py gathers per-module timestamps by running "pydates" (needs a
+mercurial checkout -- and python2-era mercurial APIs at that) or
+"pydates.git" (needs a .git directory).  A release/source tarball has
+neither, so the build exits 1 before compiling anything.
+
+When neither ../.git nor ../.hg exists, skip the VCS mining and use a
+single workspace timestamp for all modules, honouring
+SOURCE_DATE_EPOCH when the build environment provides it.  This is
+faithful to what the machinery achieves in practice anyway: the
+per-file lookup keys are bytes while the lookups use str (py3
+bit-rot), so every file already falls back to the workspace stamp.
+
+diff --git a/src/setup.py b/src/setup.py
+--- a/src/setup.py
++++ b/src/setup.py
+@@ -1105,20 +1105,32 @@
+ 
+                 if os.path.isdir(os.path.join(pwd, "../.git")):
+                     pydates = "pydates.git"
++                elif not os.path.isdir(os.path.join(pwd, "../.hg")):
++                        # Tarball build: no VCS metadata to mine for
++                        # stable per-file dates ("pydates" needs a
++                        # mercurial checkout, "pydates.git" a git one).
++                        # Use a single workspace stamp for everything;
++                        # honour SOURCE_DATE_EPOCH for reproducibility.
++                        pydates = None
++                        self.timestamps[b"."] = float(
++                            os.environ.get("SOURCE_DATE_EPOCH",
++                                os.stat(os.path.join(
++                                    pwd, "setup.py")).st_mtime))
+ 
+-                p = subprocess.Popen(
+-                    os.path.join(pwd, pydates),
+-                    stdout=subprocess.PIPE)
++                if pydates:
++                        p = subprocess.Popen(
++                            os.path.join(pwd, pydates),
++                            stdout=subprocess.PIPE)
+ 
+-                for line in p.stdout:
+-                        stamp, path = line.split()
+-                        stamp = float(stamp)
+-                        self.timestamps[path] = stamp
++                        for line in p.stdout:
++                                stamp, path = line.split()
++                                stamp = float(stamp)
++                                self.timestamps[path] = stamp
+ 
+-                if p.wait() != 0:
+-                        print("ERROR: unable to gather .py timestamps",
+-                            file=sys.stderr)
+-                        sys.exit(1)
++                        if p.wait() != 0:
++                                print("ERROR: unable to gather .py "
++                                    "timestamps", file=sys.stderr)
++                                sys.exit(1)
+ 
+                 # Before building extensions, we need to generate .c files
+                 # for the C extension modules by running the CFFI build
