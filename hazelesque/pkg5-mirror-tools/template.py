@@ -1,6 +1,6 @@
 pkgname = "pkg5-mirror-tools"
 pkgver = "0_git20250713"
-pkgrel = 0
+pkgrel = 1
 _gitrev = "4e1d42c72f1a4cc91a4ea107a4cb4e2075a067cf"
 build_wrksrc = "src"
 hostmakedepends = [

@@ -1,0 +1,31 @@
+Silence py3.14 DeprecationWarnings in the shipped entry points.
+
+The chimera-py314 patch demotes upstream's warnings-as-errors to
+'default', which prints each unique deprecation once — operator-
+facing noise that drowns the transfer progress lines (codecs.open,
+datetime.utcnow, pycurl getinfo etc. fire dozens of times across
+the import graph).  The deprecations are upstream pkg5's to fix;
+the operator can't act on them.
+
+Applies after pkg5-chimera-py314.patch (alphabetical order).
+
+--- a/src/pull.py
++++ b/src/pull.py
+@@ -1730,6 +1730,7 @@
+
+         # Make all warnings be errors.
+         warnings.simplefilter('default')  # spike: py3.14 deprecations are not errors
++        warnings.filterwarnings('ignore', category=DeprecationWarning)
+         import six
+         if six.PY3:
+                 # disable ResourceWarning: unclosed file
+--- a/src/pkgrepo.py
++++ b/src/pkgrepo.py
+@@ -2370,6 +2370,7 @@
+
+         # Make all warnings be errors.
+         warnings.simplefilter('default')  # spike: py3.14 deprecations are not errors
++        warnings.filterwarnings('ignore', category=DeprecationWarning)
+         if six.PY3:
+                 # disable ResourceWarning: unclosed file
+                 warnings.filterwarnings("ignore", category=ResourceWarning)
