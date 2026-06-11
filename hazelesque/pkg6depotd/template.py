@@ -1,5 +1,5 @@
 pkgname = "pkg6depotd"
-pkgver = "0.5.3_pre1"
+pkgver = "0.5.3_pre2"
 pkgrel = 0
 build_style = "cargo"
 # Workspace root; the depot is one member.  pkg6recv/pkg6repo are
@@ -33,11 +33,12 @@ pkgdesc = "IPS (pkg5-protocol) package depot server, Rust implementation"
 license = "MPL-2.0"
 url = "https://github.com/OpenFlowLabs/ips"
 # PLACEHOLDER source URL — upstream has no release tags yet; the
-# tarball is cut from Hazel's local clone (110ee51) via
+# tarball is cut from Hazel's local clone (d7f49ac:
+# +LISTEN_FDS socket activation) via
 # git archive and pre-seeded into sources/ (same local-tarball
 # convention as the scm-infra monorepo packages).
 source = f"{url}/archive/refs/tags/v{pkgver}.tar.gz>pkg6depotd-{pkgver}.tar.gz"
-sha256 = "1475310b8f692a82966e264b9f95f21bc9006fab5a8cf8a49024d0ab2efdd9f1"
+sha256 = "7e73fcaa41f960e87128d2673e737fd729babdda21e0857a09b7e387489fff25"
 # !check: workspace tests want network + fixture repos.
 # !cross: untested; revisit on demand.
 options = ["!check", "!cross"]
