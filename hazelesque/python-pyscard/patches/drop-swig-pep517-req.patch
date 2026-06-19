@@ -1,0 +1,24 @@
+From: Hazel Smith <hazel@hazelesque.uk>
+Subject: pyproject.toml: drop the PyPI swig shim from build-system requires
+
+pyscard's pyproject.toml lists `swig` as a PEP-517 build requirement.
+That refers to the `swig` PyPI package, which is a pip-installable
+wrapper that fetches/builds the swig binary on the fly — useful for
+pip users without a system swig.
+
+For distro packaging where the system already provides /usr/bin/swig
+(from the swig apk), the PyPI shim is just noise that makes
+python -m build --no-isolation fail with "Missing dependencies: swig"
+because it can't import a Python module named swig.  The setup.py
+proper invokes the binary directly via setuptools.command.build_ext
++ swig_opts — independent of the pyproject requires list.
+
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,5 +1,5 @@
+ [build-system]
+-requires = ["setuptools","swig"]
++requires = ["setuptools"]
+ build-backend = "setuptools.build_meta"
+
+
