@@ -1,14 +1,16 @@
 pkgname = "chanoyu"
-pkgver = "0.0.4_pre1"
+pkgver = "0.0.4_pre2"
 pkgrel = 0
 # Same monorepo-tarball arrangement as hazelesque/withy and
 # hazelesque/flautist — chanoyu is a sibling Cargo workspace under
 # scm-infra with path-deps crossing the boundary
-# (../hazelesque-common/...).  This first package predates a
-# pushed v0.0.4_pre1 tag: the cached tarball is a LOCAL
-# `git archive` of main@91c2c83 (D42 — attested rehearsal gate),
-# staged by hand into sources/chanoyu-0.0.4_pre1/.  When the tag
-# lands on the remote, refresh-hazelesque-source.sh reproduces it.
+# (../hazelesque-common/...).  This package predates a pushed
+# v0.0.4_pre2 tag: the cached tarball is a LOCAL `git archive` of
+# main@d1098a1 (D44 — foreign-card-state guard +
+# --wipe-foreign-card; supersedes the never-published _pre1 whose
+# binary lacked the guard), staged by hand into
+# sources/chanoyu-0.0.4_pre2/.  When the tag lands on the remote,
+# refresh-hazelesque-source.sh reproduces it.
 build_wrksrc = "chanoyu"
 build_style = "cargo"
 # Ship the ceremony CLI plus the chanoyu-schsm hardware bins: the
@@ -50,7 +52,7 @@ url = "https://github.com/hazelesque/scm-infra"
 # PLACEHOLDER — private repo; see the tarball note above and
 # refresh-hazelesque-source.sh one level above the cports tree.
 source = f"https://github.com/hazelesque/scm-infra/archive/refs/tags/v{pkgver}.tar.gz>scm-infra-{pkgver}.tar.gz"
-sha256 = "100619f7809e154c51cb34e0e6cdaa20546d3f2150500ebca3ecb3e1346d9f69"
+sha256 = "ea4484a07908777602fe8d9b96afb8630f343f81f64b793b417b5040ecf4822f"
 # !check: chanoyu's tests run in the source tree (cargo test) and
 #         the smoke needs openssl/step on PATH — not a
 #         packaging-time job.
