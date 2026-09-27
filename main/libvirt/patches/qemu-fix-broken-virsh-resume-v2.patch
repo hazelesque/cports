@@ -1,0 +1,20 @@
+diff -ur --no-dereference libvirt-11.6.0-pristine/src/qemu/qemu_process.c libvirt-11.6.0/src/qemu/qemu_process.c
+--- libvirt-11.6.0-pristine/src/qemu/qemu_process.c	2025-08-01 10:03:17.000000000 +0100
++++ libvirt-11.6.0/src/qemu/qemu_process.c	2026-05-31 16:55:16.579353065 +0100
+@@ -5027,6 +5027,16 @@
+         }
+         inc->uri = g_strdup_printf("file:%s,offset=%#zx",
+                                    qemuFDPassGetPath(inc->fdPassMigrate), offset);
++    } else if (data && data->header.format == QEMU_SAVE_FORMAT_RAW) {
++        size_t offset = sizeof(virQEMUSaveHeader) + data->header.data_len;
++        /* Pass the save-file FD via an fdset so QEMU resolves it through
++         * /dev/fdset/N rather than doing a fresh open() on the filesystem path.
++         * This avoids DAC permission failures when the save file is root-owned
++         * and QEMU runs as an unprivileged user. */
++        inc->fdPassMigrate = qemuFDPassNew("libvirt-incoming-migrate", priv);
++        qemuFDPassAddFD(inc->fdPassMigrate, fd, "-buffered-fd");
++        inc->uri = g_strdup_printf("file:%s,offset=%#zx",
++                                   qemuFDPassGetPath(inc->fdPassMigrate), offset);
+     } else {
+         inc->uri = qemuMigrationDstGetURI(migrateFrom, *fd);
+     }
