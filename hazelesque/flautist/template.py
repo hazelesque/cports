@@ -1,5 +1,5 @@
 pkgname = "flautist"
-pkgver = "0.0.1_pre1"
+pkgver = "0.0.3_pre1"
 pkgrel = 0
 # Sources are the scm-infra monorepo tarball — shared with
 # the `withy` cports package.  See that template + the
@@ -11,18 +11,41 @@ build_wrksrc = "flautist"  # cargo runs in flautist-VER/flautist/
 #  so the post-extract path is `flautist-VER/flautist/`, not
 #  `scm-infra-VER/flautist/`.)
 build_style = "cargo"
-# Workspace produces three binaries: f7 (multi-subcommand CLI
-# — `f7 serve`, `f7 daemon`, `f7 codebrowser`, etc.), f7-agent
-# (the standalone mTLS signing agent, separate binary because
-# of the fork-before-load pattern), and scip-f7-bazel (the
-# SCIP indexer wrapper invoked by xref-daemon under nested
-# bwrap).  Install all three; per-instance dinit subpackages
-# only bring up `f7 serve` for now.
+# Post-#218-binary-split layout: the old multi-call `f7` binary
+# was split into per-daemon binaries so server-side changes don't
+# trigger CLI LTO rebuilds.  The flautist workspace now produces:
+#
+#   f7            flautist-cli           operator CLI; `f7 serve`
+#                                        et al exec-passthrough to
+#                                        the per-daemon binaries
+#   f7repod       flautist-server        central repo server
+#   f7nfsd        flautist-daemon        workspace NFS daemon
+#   f7webd        flautist-codebrowser   read-only web UI
+#   f7xrefd       flautist-xref-daemon   SCIP xref indexer daemon
+#   f7cid         flautist-ci-daemon     CI run executor
+#   f7buildd      flautist-build-daemon  build-artifact daemon
+#   scip-f7-bazel flautist-scip-bazel    SCIP indexer wrapper
+#
+# `f7 serve` literally execs /usr/bin/f7repod, so the dinit
+# services break unless the per-daemon binaries install alongside
+# the CLI.  f7-agent moved OUT of this workspace — it now builds
+# from the sibling `hazelesque-common` workspace (crate
+# `hazelesque-agent`); see the build() override below.
 make_build_args = [
     "-p",
     "flautist-cli",
     "-p",
-    "flautist-agent",
+    "flautist-server",
+    "-p",
+    "flautist-daemon",
+    "-p",
+    "flautist-codebrowser",
+    "-p",
+    "flautist-xref-daemon",
+    "-p",
+    "flautist-ci-daemon",
+    "-p",
+    "flautist-build-daemon",
     "-p",
     "flautist-scip-bazel",
 ]
@@ -59,7 +82,7 @@ url = "https://github.com/hazelesque/scm-infra"
 # below is a "where this would be if scm-infra were public"
 # placeholder; cbuild falls back to it only on cache miss.
 source = f"https://github.com/hazelesque/scm-infra/archive/refs/tags/v{pkgver}.tar.gz>scm-infra-{pkgver}.tar.gz"
-sha256 = "8ae13ec5e5e1c231ce7929a185a83b60a834116b95e68b0314801d1346aaf1d7"
+sha256 = "e72381e97b6c6f33ec29badf0c38db832124bf37218aa3bde230249627e2bc43"
 # hazelesque-service-mgmt's /tokioz page calls tokio runtime-metrics
 # methods (spawned_tasks_count, worker_local_queue_depth, etc.) that
 # are gated behind `--cfg=tokio_unstable`.  The same flag is set in
@@ -84,19 +107,59 @@ def prepare(self):
     # explicitly so vendor descends into the right workspace.
     # See `user/gopls/template.py` for the same pattern for go.
     self.cargo.vendor(wrksrc=build_wrksrc)
+    # Second workspace: `hazelesque-common` produces f7-agent
+    # (crate `hazelesque-agent`).  Separate Cargo workspace =
+    # separate Cargo.lock = separate vendor pass; each vendor()
+    # writes its own .cargo/config.toml next to its workspace
+    # root, so the two builds resolve their own vendored trees.
+    self.cargo.vendor(wrksrc="hazelesque-common")
+
+
+def build(self):
+    # Default workspace build (flautist; cwd is already
+    # srcdir/build_wrksrc here, and make_build_args carries the
+    # per-daemon -p list).
+    self.cargo.build()
+    # f7-agent from the sibling workspace.  Use invoke() rather
+    # than build() so make_build_args (flautist crate names)
+    # doesn't leak into the hazelesque-common invocation.
+    # `--offline` comes from invoke()'s offline default; the
+    # vendor pass in prepare() makes that resolvable.  PIV
+    # transport stays feature-gated OFF (default features) —
+    # the demo instance doesn't need hardware-token signing and
+    # enabling it would drag in pcsc-lite at build + runtime.
+    self.cargo.invoke(
+        "build",
+        args=["--release", "-p", "hazelesque-agent"],
+        wrksrc="../hazelesque-common",
+    )
 
 
 def install(self):
     # Override the default cargo build_style install.  That one runs
     # `cargo install --path . --no-track $make_install_args`, and we
-    # have `-p crate1 -p crate2 -p crate3` in make_install_args (the
+    # have `-p crate1 -p crate2 ...` in make_install_args (the
     # `-p` flags are valid for `cargo build` but NOT `cargo install`,
     # which insists on a single package via --path / --bin selectors).
-    # The workspace is already built; just copy the binaries out.
+    # The workspaces are already built; just copy the binaries out.
     triplet = self.profile().triplet
     release = f"target/{triplet}/release"
-    for binary in ("f7", "f7-agent", "scip-f7-bazel"):
+    for binary in (
+        "f7",
+        "f7repod",
+        "f7nfsd",
+        "f7webd",
+        "f7xrefd",
+        "f7cid",
+        "f7buildd",
+        "scip-f7-bazel",
+    ):
         self.install_bin(f"{release}/{binary}")
+    # f7-agent built in the sibling workspace's own target dir
+    # (no shared target-dir override in the committed
+    # .cargo/config.toml files — the dev tree's shared root
+    # target/ comes from dev.sh env, not config).
+    self.install_bin(f"../hazelesque-common/{release}/f7-agent")
 
 
 def post_install(self):

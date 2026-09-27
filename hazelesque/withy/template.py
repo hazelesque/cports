@@ -1,5 +1,5 @@
 pkgname = "withy"
-pkgver = "0.0.1_pre1"
+pkgver = "0.0.3_pre1"
 pkgrel = 0
 # Sources are the whole scm-infra monorepo tarball — withy
 # (and flautist) live as sibling workspaces under it, with
@@ -17,8 +17,8 @@ build_style = "cargo"
 # install target.  cports' cargo style installs all bins by
 # default but we restrict to wy explicitly so we don't ship
 # stray test binaries or future dev-only CLIs.
-make_build_args = ["-p", "withy-cli"]
-make_install_args = ["-p", "withy-cli"]
+make_build_args = ["-p", "withy-cli", "-p", "withy-mcp"]
+make_install_args = ["-p", "withy-cli", "-p", "withy-mcp"]
 hostmakedepends = [
     "cargo-auditable",
     "protobuf-protoc",  # withy-proto's build.rs invokes prost-build → protoc.
@@ -55,7 +55,7 @@ url = "https://github.com/hazelesque/scm-infra"
 # from if the monorepo were public" placeholder; cbuild only
 # falls back to it on cache miss.
 source = f"https://github.com/hazelesque/scm-infra/archive/refs/tags/v{pkgver}.tar.gz>scm-infra-{pkgver}.tar.gz"
-sha256 = "8ae13ec5e5e1c231ce7929a185a83b60a834116b95e68b0314801d1346aaf1d7"
+sha256 = "e72381e97b6c6f33ec29badf0c38db832124bf37218aa3bde230249627e2bc43"
 # hazelesque-service-mgmt's /tokioz page calls tokio runtime-metrics
 # methods (spawned_tasks_count, worker_local_queue_depth, etc.) that
 # are gated behind `--cfg=tokio_unstable`.  The same flag is set in
@@ -89,6 +89,9 @@ def install(self):
     # template for the longer rationale.
     triplet = self.profile().triplet
     self.install_bin(f"target/{triplet}/release/wy")
+    # MCP stdio server — runs as a `wy-mcp` subprocess of the
+    # MCP client (e.g. Claude Code); board access for agents.
+    self.install_bin(f"target/{triplet}/release/wy-mcp")
 
 
 def post_install(self):
