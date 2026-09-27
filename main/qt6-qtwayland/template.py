@@ -1,6 +1,6 @@
 pkgname = "qt6-qtwayland"
-pkgver = "6.11.0"
-pkgrel = 0
+pkgver = "6.11.2"
+pkgrel = 1
 build_style = "cmake"
 configure_args = ["-DQT_BUILD_TESTS=ON"]
 make_check_args = [
@@ -18,14 +18,13 @@ hostmakedepends = [
 ]
 makedepends = ["qt6-qtbase-private-devel", "qt6-qtdeclarative-devel"]
 checkdepends = ["mesa-dri"]
-install_if = [self.with_pkgver("qt6-qtbase-gui"), "wayland"]
 pkgdesc = "Qt6 Wayland component"
 license = (
     "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
 )
 url = "https://www.qt.io"
 source = f"https://download.qt.io/official_releases/qt/{pkgver[:-2]}/{pkgver}/submodules/qtwayland-everywhere-src-{pkgver}.tar.xz"
-sha256 = "e710e6e760f92922b86e4dd68f6bbe94ef6510919519d1b0068e874b5ad84d37"
+sha256 = "8eb7615e39332a10f506e8dd70f02d5954bb5949ff54f6dcbf8bd6168222f9df"
 # FIXME
 hardening = ["!int"]
 # TODO

@@ -1,6 +1,6 @@
 pkgname = "godot"
-pkgver = "4.6.2"
-pkgrel = 0
+pkgver = "4.7.1"
+pkgrel = 1
 hostmakedepends = [
     "gettext",
     "pkgconf",
@@ -37,14 +37,14 @@ subdesc = "GUI editor"
 license = "MIT"
 url = "https://godotengine.org"
 source = f"https://github.com/godotengine/godot/releases/download/{pkgver}-stable/godot-{pkgver}-stable.tar.xz"
-sha256 = "3465f34ae41cb7d7c17b0516c7cce93cc8a7a4d62331456b7b18e4e1d1b064c2"
+sha256 = "0230d490846467c4fd772cc70b08dc56cb3adfedd55d039de0af74ddfdba00eb"
 # cross: nah
 options = ["!cross"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "SafeNumeric seemingly unimplemented"
 
-match self.profile().arch:
+match self.profile.arch:
     case "x86_64":
         _godot_arch = "x86_64"
     case "armv7":
@@ -59,7 +59,7 @@ match self.profile().arch:
         _godot_arch = "ppc64"
     case _:
         _godot_arch = ""
-        broken = f"{self.profile().arch} is unsupported"
+        broken = f"{self.profile.arch} is unsupported"
 
 _scons_flags = [
     "platform=linuxbsd",
@@ -109,7 +109,7 @@ _scons_flags = [
 ]
 
 
-if self.profile().arch in ["aarch64", "x86_64"]:
+if self.profile.arch in ["aarch64", "x86_64"]:
     makedepends += ["embree-devel"]
     _scons_flags += ["builtin_embree=false"]
 
@@ -145,10 +145,14 @@ def install(self):
         "misc/dist/linux/org.godotengine.Godot.xml", "usr/share/mime/packages"
     )
     self.install_file(
-        "icon.png", "usr/share/icons/hicolor/256x256/apps", name="godot.png"
+        "misc/logo/icon.png",
+        "usr/share/icons/hicolor/256x256/apps",
+        name="godot.png",
     )
     self.install_file(
-        "icon.svg", "usr/share/icons/hicolor/scalable/apps", name="godot.svg"
+        "misc/logo/icon.svg",
+        "usr/share/icons/hicolor/scalable/apps",
+        name="godot.svg",
     )
     self.install_man("misc/dist/linux/godot.6")
     self.install_bin(

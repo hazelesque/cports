@@ -1,5 +1,5 @@
 pkgname = "pix"
-pkgver = "3.4.7"
+pkgver = "3.4.11"
 pkgrel = 0
 build_style = "meson"
 configure_args = ["-Dlibbrasero=false", "-Dwebservices=false"]
@@ -23,12 +23,12 @@ makedepends = [
     "xapp-devel",
     "zlib-ng-compat-devel",
 ]
-depends = ["xapp-progs"]
+depends = ["xapp-progs", "xapp-symbolic-icons"]
 pkgdesc = "Image management application"
 license = "GPL-2.0-or-later"
 url = "https://projects.linuxmint.com/xapps"
 source = f"https://github.com/linuxmint/pix/archive/refs/tags/{pkgver}.tar.gz"
-sha256 = "6bb240ebc8b058aa3e165d6e128dbced3248e561860ab50b7f958a4b20c5ec29"
+sha256 = "47ac74d19399fdde5d0e2e5d1c2b4a29c3281a549ca7881a1fb8457b1bf5c5eb"
 
 
 @subpackage("pix-devel")

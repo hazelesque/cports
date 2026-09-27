@@ -41,14 +41,14 @@ sha256 = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896"
 # FIXME int
 hardening = ["!int"]
 
-if self.profile().cross:
+if self.profile.cross:
     hostmakedepends.append("colord")
 
 
 def post_install(self):
-    self.install_service("^/colord")
-    self.install_sysusers("^/sysusers.conf")
-    self.install_tmpfiles("^/tmpfiles.conf")
+    self.install_service(self.files_path / "colord")
+    self.install_sysusers(self.files_path / "sysusers.conf")
+    self.install_tmpfiles(self.files_path / "tmpfiles.conf")
 
 
 @subpackage("colord-libs")

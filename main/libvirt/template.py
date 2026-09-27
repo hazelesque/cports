@@ -82,15 +82,16 @@ license = "LGPL-2.1-only"
 url = "https://libvirt.org"
 source = f"https://download.libvirt.org/libvirt-{pkgver}.tar.xz"
 sha256 = "cc0e8c226559b479833c8bc9c77a8ec301482ab0305fcd98d27f11cc6877fd23"
+options = ["etcfiles"]
 
-if self.profile().wordsize != 32:
+if self.profile.wordsize != 32:
     depends += ["virtiofsd-meta"]
 
 
 def post_install(self):
     self.uninstall("usr/lib/sysusers.d")
-    self.install_tmpfiles("^/tmpfiles.conf")
-    self.install_sysusers("^/sysusers.conf")
+    self.install_tmpfiles(self.files_path / "tmpfiles.conf")
+    self.install_sysusers(self.files_path / "sysusers.conf")
 
     for service in [
         "ch",
@@ -107,7 +108,7 @@ def post_install(self):
         "storage",
         "vbox",
     ]:
-        self.install_service(f"^/virt{service}d")
+        self.install_service(self.files_path / f"virt{service}d")
 
 
 @subpackage("libvirt-devel")

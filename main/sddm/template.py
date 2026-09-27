@@ -1,9 +1,8 @@
 pkgname = "sddm"
 pkgver = "0.21.0"
-pkgrel = 4
+pkgrel = 7
 build_style = "cmake"
 configure_args = [
-    "-DCMAKE_INSTALL_LIBEXECDIR=libexec",  # TODO switch libexec
     "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     "-DBUILD_MAN_PAGES=ON",
     "-DBUILD_WITH_QT6=ON",
@@ -35,10 +34,9 @@ depends = [
     "dinit-dbus",
     "elogind",
     "openrc-settingsd",
-    "plasma-workspace",
     "turnstile",
+    "virtual:sddm-theme-default!sddm-theme-none",
     "xrdb",
-    "xserver-xorg-input-libinput",
 ]
 pkgdesc = "QML based display manager"
 license = "GPL-2.0-or-later AND CC-BY-3.0"
@@ -55,16 +53,7 @@ def post_install(self):
     self.install_tmpfiles(self.files_path / "tmpfiles.conf")
     self.install_service(self.files_path / "sddm")
     self.install_file(
-        self.files_path / "sddm.config",
-        "usr/lib/sddm/sddm.conf.d",
-        name="default.conf",
-    )
-    # TODO: we add a hard dependency on plasma-workspace and default to breeze
-    # here, because all the default themes (except maui) and most third-party
-    # themes depend on the qt5 greeter,
-    # and breeze just looks way better
-    self.install_file(
-        self.files_path / "10-breeze-theme.conf",
+        self.files_path / "00-default.conf",
         "usr/lib/sddm/sddm.conf.d",
     )
     # all unusable
@@ -73,3 +62,27 @@ def post_install(self):
         self.install_file(
             self.files_path / f"{pam}.pam", "usr/lib/pam.d", name=pam
         )
+
+
+@subpackage("sddm-default-kwin")
+def _(self):
+    self.subdesc = "Wayland compositor dependencies"
+    self.install_if = [self.parent]
+    self.depends += [
+        self.parent,
+        "kwin",
+        # input method
+        "plasma-keyboard",
+    ]
+    self.options = ["empty"]
+
+    return []
+
+
+@subpackage("sddm-theme-none")
+def _(self):
+    self.subdesc = "no theme"
+    self.provides = ["sddm-theme-default=0"]
+    self.options = ["empty"]
+
+    return []

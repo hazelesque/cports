@@ -1,5 +1,5 @@
 pkgname = "attica"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 # requires network access and passes in cbuild chroot
@@ -8,9 +8,9 @@ hostmakedepends = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
 makedepends = ["qt6-qttools-devel"]
 pkgdesc = "Freedesktop Open Collaboration Services (OCS) binding for Qt"
 license = "LGPL-2.0-or-later"
-url = "https://api.kde.org/frameworks/attica/html"
+url = "https://community.kde.org/Frameworks"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/attica-{pkgver}.tar.xz"
-sha256 = "eb2d3d2d8b12c2ab4d192c4ae6f07b0188a40aa002b3056db6369b47b2f9df96"
+sha256 = "3eec8d2d9c77ad5f7cfd38e44e4b1492c5d0dec695b13f711c09f7d6187c276c"
 hardening = ["vis"]
 
 

@@ -1,12 +1,12 @@
 pkgname = "go-task"
 pkgver = "3.49.0"
-pkgrel = 2
+pkgrel = 5
 build_style = "go"
 make_build_args = [
     "./cmd/task",
 ]
 hostmakedepends = ["go"]
-pkgdesc = "Task runner / simpler Make alternative written in Go"
+pkgdesc = "Task runner and a Make alternative"
 license = "MIT"
 url = "https://taskfile.dev"
 source = f"https://github.com/go-task/task/archive/refs/tags/v{pkgver}.tar.gz"
@@ -15,7 +15,7 @@ sha256 = "6b3b74dbfff7493a157b8edcbac5ee4703a2711031bfa49a9b5bfef419bf81f3"
 options = []
 
 # test suite expects amd64
-if self.profile().arch != "x86_64":
+if self.profile.arch != "x86_64":
     options += ["!check"]
 
 

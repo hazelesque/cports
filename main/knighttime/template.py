@@ -1,10 +1,7 @@
 pkgname = "knighttime"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
-configure_args = [
-    "-DCMAKE_INSTALL_LIBEXECDIR=libexec",  # TODO switch libexec
-]
 hostmakedepends = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
 makedepends = [
     "kconfig-devel",
@@ -19,7 +16,7 @@ pkgdesc = "KDE helpers for scheduling the dark-light cycle"
 license = "LGPL-2.1-or-later"
 url = "https://invent.kde.org/plasma/knighttime"
 source = f"$(KDE_SITE)/plasma/{pkgver}/knighttime-{pkgver}.tar.xz"
-sha256 = "5f26692a864540b993351106f5469fd17939bd55e79f931c8f97395d9c5a809d"
+sha256 = "5cb23e736e4be4952e63c855cfb45850e1085d650e67b7cae3cbf9721921cb9f"
 hardening = ["vis"]
 
 

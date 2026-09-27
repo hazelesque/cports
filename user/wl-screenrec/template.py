@@ -23,10 +23,12 @@ options = ["!check", "!cross"]
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "zsh"]:
         with open(self.cwd / f"wl-screenrec.{shell}", "w") as f:
             self.do(
-                f"./target/{self.profile().triplet}/release/wl-screenrec",
+                cargo.target_path(self, "wl-screenrec"),
                 "--generate-completions",
                 shell,
                 stdout=f,
@@ -34,7 +36,9 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/wl-screenrec")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "wl-screenrec"))
     self.install_license("LICENSE")
     for shell in ["bash", "fish", "zsh"]:
         self.install_completion(f"wl-screenrec.{shell}", shell, "wl-screenrec")

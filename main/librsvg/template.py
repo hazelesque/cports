@@ -1,9 +1,9 @@
 pkgname = "librsvg"
-pkgver = "2.62.2"
+pkgver = "2.63.2"
 pkgrel = 0
 build_style = "meson"
 configure_args = [
-    f"-Dtriplet={self.profile().triplet}",
+    f"-Dtriplet={self.profile.triplet}",
     "-Davif=enabled",
     "-Ddocs=disabled",
     "-Dintrospection=enabled",
@@ -39,7 +39,7 @@ pkgdesc = "SVG library for GNOME"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 url = "https://wiki.gnome.org/Projects/LibRsvg"
 source = f"$(GNOME_SITE)/librsvg/{pkgver[:-2]}/librsvg-{pkgver}.tar.xz"
-sha256 = "c0c1367e381e1ae4842a78f1b57c656ff19b25637e3a6527cb44ae5a1cc68d65"
+sha256 = "852b18e1a00b8605528825a27dc7748bff2a5dd254028f59dc22a34ea57e81b6"
 # check: sample files may differ based on pango/freetype/harfbuzz version
 # cross: no introspection in cross
 options = ["!check", "!cross"]

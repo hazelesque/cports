@@ -1,5 +1,5 @@
 pkgname = "agate"
-pkgver = "3.3.22"
+pkgver = "3.3.24"
 pkgrel = 0
 build_style = "cargo"
 hostmakedepends = ["cargo-auditable", "pkgconf"]
@@ -9,11 +9,13 @@ pkgdesc = "Server for the Gemini Protocol"
 license = "Apache-2.0 OR MIT"
 url = "https://github.com/mbrubeck/agate"
 source = f"{url}/archive/refs/tags/v{pkgver}.tar.gz"
-sha256 = "7fc67b7a1620cdc3d62f629dfd25e4c7eb28325f9ba6a7e95d36e633de286d0d"
+sha256 = "8776f2d7fe9155149cefd1151b43171ca307eb7b6eb5050221d73a4cefef5db0"
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/agate")
-    self.install_tmpfiles("^/tmpfiles.conf")
-    self.install_sysusers("^/sysusers.conf")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "agate"))
+    self.install_tmpfiles(self.files_path / "tmpfiles.conf")
+    self.install_sysusers(self.files_path / "sysusers.conf")
     self.install_license("LICENSE-MIT")

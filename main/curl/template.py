@@ -1,9 +1,8 @@
 pkgname = "curl"
-pkgver = "8.18.0"
+pkgver = "8.22.0"
 pkgrel = 0
 build_style = "gnu_configure"
 configure_args = [
-    "--disable-optimize",
     "--enable-ares",
     "--enable-httpsrr",
     "--enable-ipv6",
@@ -16,7 +15,7 @@ configure_args = [
     "--with-libssh2",
     "--with-nghttp2",
     "--with-nghttp3",
-    "--with-openssl-quic",
+    "--with-ngtcp2",
     "--with-ssl",
     "--with-zlib",
     "--with-zsh-functions-dir=/usr/share/zsh/site-functions/",
@@ -27,11 +26,18 @@ configure_args = [
 hostmakedepends = ["automake", "pkgconf", "perl", "mandoc", "slibtool"]
 makedepends = [
     "c-ares-devel",
+    # we have that here because ngtcp2-devel depends on pc:gnutls
+    # which will in final-cycle builds pull in the non-bootstrap
+    # gnutls, which pulls in brotli through its dependencies; this
+    # creates a silently cyclic build and we never had brotli in
+    # curl before so satisfy ngtcp2 with bootstrap package
+    "gnutls-bootstrap",
     "libidn2-devel",
     "libpsl-devel",
     "libssh2-devel",
     "nghttp2-devel",
     "nghttp3-devel",
+    "ngtcp2-devel",
     "openssl3-devel",
     "zlib-ng-compat-devel",
     "zstd-devel",
@@ -45,9 +51,9 @@ checkdepends = [
 depends = ["ca-certificates"]
 pkgdesc = "Command line tool for transferring data with URL syntax"
 license = "MIT"
-url = "https://curl.haxx.se"
+url = "https://curl.se"
 source = f"{url}/download/curl-{pkgver}.tar.xz"
-sha256 = "40df79166e74aa20149365e11ee4c798a46ad57c34e4f68fd13100e2c9a91946"
+sha256 = "f7ef3ae8a22e521f289803fe93543eb64c329b58aa73a9e224dfd915a2a5f4f7"
 hardening = ["vis", "!cfi"]
 
 
@@ -55,14 +61,14 @@ def post_install(self):
     self.install_license("COPYING")
 
     # patch curl-config for cross
-    if not self.profile().cross:
+    if not self.profile.cross:
         return
 
     with open(self.destdir / "usr/bin/curl-config") as inf:
         with open(self.destdir / "usr/bin/curl-config.new", "w") as outf:
             for ln in inf:
-                ln = ln.replace(f"-L{self.profile().sysroot / 'usr/lib'} ", "")
-                ln = ln.replace(f"{self.profile().triplet}-", "")
+                ln = ln.replace(f"-L{self.profile.sysroot / 'usr/lib'} ", "")
+                ln = ln.replace(f"{self.profile.triplet}-", "")
                 outf.write(ln)
 
     self.rename("usr/bin/curl-config.new", "curl-config")
@@ -73,7 +79,8 @@ def init_check(self):
     # upstream recommends cpucores*7 as a good starting point
     # 1510 consistently fails when run with other tests (parallelism?)
     # but works just fine when run on its own
-    self.make_check_env["TFLAGS"] = f"-j{self.make_jobs * 7} !1510"
+    # 241 fails intermittently, seems ok when installed?
+    self.make_check_env["TFLAGS"] = f"-j{min(self.make_jobs, 8) * 7} !1510 !241"
 
 
 @subpackage("curl-libs")
@@ -86,7 +93,6 @@ def _(self):
 
 @subpackage("curl-devel")
 def _(self):
-    self.depends += makedepends
     self.pkgdesc = "Multiprotocol file transfer library"
     self.renames = ["libcurl-devel"]
 

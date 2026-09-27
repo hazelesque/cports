@@ -1,6 +1,6 @@
 pkgname = "inkscape"
 pkgver = "1.4.4"
-pkgrel = 0
+pkgrel = 2
 build_style = "cmake"
 configure_args = [
     "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
@@ -63,7 +63,7 @@ hardening = ["!int"]
 # long, heavy, etc
 options = ["!check"]
 
-if self.profile().arch in [
+if self.profile.arch in [
     "aarch64",
     "loongarch64",
     "ppc64le",

@@ -237,8 +237,6 @@ def shell_update(rnet, dirty):
                 idxp = rd.parent / cr / hcpu
                 if (idxp / "Packages.adb").is_file():
                     rfh.write(f"v3 /binpkgs/{cr}\n")
-                elif (idxp / "APKINDEX.tar.gz").is_file():
-                    rfh.write(f"v2 /binpkgs/{cr}\n")
         if paths.alt_repository():
             for rd in paths.alt_repository().iterdir():
                 for cr in get_confrepos():
@@ -248,8 +246,6 @@ def shell_update(rnet, dirty):
                     idxp = rd.parent / cr / hcpu
                     if (idxp / "Packages.adb").is_file():
                         rfh.write(f"v3 /altbinpkgs/{cr}\n")
-                    elif (idxp / "APKINDEX.tar.gz").is_file():
-                        rfh.write(f"v2 /altbinpkgs/{cr}\n")
         # remote repos come last
         if rnet:
             from cbuild.core import profile
@@ -270,8 +266,12 @@ def shell_update(rnet, dirty):
 
     with flock.lock(flock.apklock(hcpu)):
         if (
-            apki.call_chroot(
-                "update", [], None, full_chroot=True, allow_network=rnet
+            enter(
+                "apk",
+                "update",
+                fakeroot=True,
+                mount_binpkgs=True,
+                mount_cbuild_cache=True,
             ).returncode
             != 0
         ):
@@ -575,12 +575,13 @@ def cleanup_world(bootstrapping, prof=None, perform=True):
             outf.write(f"{ep}\n")
 
     # perform transaction
-    f_ret = apki.call_chroot(
+    f_ret = apki.call(
         "fix",
         [],
         template.get_cats(),
         capture_output=True,
         allow_untrusted=True,
+        chroot=True,
     )
 
     if f_ret.returncode != 0:
@@ -608,16 +609,19 @@ def update(pkg):
     _prepare_etc()
 
     with flock.lock(flock.apklock(host_cpu())):
-        apki.call_chroot("update", ["-q"], pkg, check=True, use_stage=True)
-        apki.call_chroot(
-            "upgrade", ["--available"], pkg, check=True, use_stage=True
-        )
+        fret = apki.call("update", ["-q"], pkg, use_stage=True, chroot=True)
+        if fret.returncode == 0:
+            fret = apki.call(
+                "upgrade", ["--available"], pkg, use_stage=True, chroot=True
+            )
+        if fret.returncode != 0:
+            raise errors.CbuildException("failed to update bldroot")
 
     # this is bootstrap-update
     if isinstance(pkg, str):
         return
 
-    prof = pkg.profile()
+    prof = pkg.profile
 
     # not cross, so we don't care
     if not prof.cross:

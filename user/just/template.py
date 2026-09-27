@@ -1,5 +1,5 @@
 pkgname = "just"
-pkgver = "1.51.0"
+pkgver = "1.58.0"
 pkgrel = 0
 build_style = "cargo"
 # skip tests that fail when run outside of git repo
@@ -12,22 +12,26 @@ pkgdesc = "Save and run commands from justfile"
 license = "CC0-1.0"
 url = "https://github.com/casey/just"
 source = f"{url}/archive/{pkgver}.tar.gz"
-sha256 = "ed424dcf55ec08e22a0c58f6cfb7333573775d69dac3802bf0c1d96f7557089d"
+sha256 = "c8a36e6e9397f2fdfcb0cc246fcdb790b52a784f3c8cabc0d8baeb031852a148"
 # generates completions and man page with host binary
 options = ["!cross"]
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     with open(self.cwd / "just.1", "w") as f:
         self.do(
-            f"./target/{self.profile().triplet}/release/just",
+            cargo.target_path(self, "just"),
             "--man",
             stdout=f,
         )
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/just")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "just"))
     self.install_man("just.1")
     for shell in ["bash", "fish", "zsh"]:
         self.install_completion(f"completions/just.{shell}", shell)

@@ -1,5 +1,5 @@
 pkgname = "ibus"
-pkgver = "1.5.32"
+pkgver = "1.5.34"
 pkgrel = 2
 build_style = "gnu_configure"
 configure_args = [
@@ -57,9 +57,9 @@ pkgdesc = "Intelligent Input Bus"
 license = "LGPL-2.1-or-later"
 url = "https://github.com/ibus/ibus"
 source = f"{url}/releases/download/{pkgver}/ibus-{pkgver}.tar.gz"
-sha256 = "b24f41ae38b236b254c09f1a8f53c2354b69b0789e89cea888d0494b09d15d67"
+sha256 = "12a72210ce5250f8a66df562a75e034e67b2bce74c4df2983dc86d1154894943"
 # gtk3 can't handle seatless wayland displays
-options = ["!cross", "!check"]
+options = ["etcfiles", "!cross", "!check"]
 
 
 def post_extract(self):

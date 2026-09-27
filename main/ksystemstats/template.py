@@ -1,5 +1,5 @@
 pkgname = "ksystemstats"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 # appended to below
@@ -37,7 +37,7 @@ pkgdesc = "KDE Plugin based system monitoring daemon"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 url = "https://invent.kde.org/plasma/ksystemstats"
 source = f"$(KDE_SITE)/plasma/{pkgver}/ksystemstats-{pkgver}.tar.xz"
-sha256 = "6b5e2f2a6aaae97489e75818e7f83c2586578022760821c677cdebcefa542e36"
+sha256 = "27cfb9a189244b897ae23f3a8681e7c4b45cc67ec27faff8961783edce16f1fc"
 # silence some ~600 lines of spam...
 tool_flags = {"CXXFLAGS": ["-Wno-deprecated-declarations"]}
 file_modes = {
@@ -51,7 +51,7 @@ file_xattrs = {
 hardening = ["vis"]
 
 
-if self.profile().arch == "ppc64le":
+if self.profile.arch == "ppc64le":
     make_check_args += [
         "-E",
         "TestLinuxCpu",  # "Subprocess aborted"?

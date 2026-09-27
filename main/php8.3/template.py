@@ -1,5 +1,5 @@
 pkgname = "php8.3"
-pkgver = "8.3.31"
+pkgver = "8.3.33"
 _majver = pkgver[0 : pkgver.rfind(".")]
 pkgrel = 0
 _apiver = "20230831"
@@ -133,9 +133,10 @@ pkgdesc = "HTML-embedded scripting language"
 license = "PHP-3.01"
 url = "https://www.php.net"
 source = f"{url}/distributions/php-{pkgver}.tar.gz"
-sha256 = "4e7baaf0a690e954a20e7ced3dd633ce8cb8094e2b6b612a55e703ecbbdcbf4f"
+sha256 = "f43566da482abeb1614a512dabeda74967847ce8e176a977390d7a115e7812fd"
+options = ["etcfiles"]
 
-if self.profile().arch in ["loongarch64"]:
+if self.profile.arch in ["loongarch64"]:
     makedepends += ["libucontext-devel"]
     tool_flags = {"LDFLAGS": ["-lucontext"]}
 
@@ -190,7 +191,7 @@ def post_patch(self):
         "ext/ldap/tests/*.phpt",
     ]
 
-    match self.profile().arch:
+    match self.profile.arch:
         case "ppc64le":
             # all related to fibers?
             failing_tests += [
@@ -219,12 +220,14 @@ def init_install(self):
 def post_install(self):
     self.install_license("LICENSE")
     self.install_file("README.md", f"usr/share/doc/php{_majver}")
-    self.install_service(f"^/php-fpm{_majver}")
+    self.install_service(self.files_path / f"php-fpm{_majver}")
     # default php-fpm config files
     self.rename(f"etc/php{_majver}/php-fpm.conf.default", "php-fpm.conf")
     for f in ["pear", "peardev", "pecl"]:
         self.rename(f"usr/bin/{f}", f"{f}{_majver}")
-    self.install_file("^/www.conf", f"etc/php{_majver}/php-fpm.d")
+    self.install_file(
+        self.files_path / "www.conf", f"etc/php{_majver}/php-fpm.d"
+    )
     # these are unnecessary with apk backups
     self.uninstall(f"etc/php{_majver}/php-fpm.d/*.default", glob=True)
     # extensions
@@ -278,6 +281,7 @@ def _extension(extn, iif):
     def _(self):
         self.subdesc = f"{extn} extension"
         self.depends += [self.parent]
+        self.options = ["etcfiles"]
 
         if iif:
             self.install_if = [self.parent]
@@ -343,6 +347,7 @@ def _(self):
     self.pkgdesc = f"PHP{_majver} Extension and Application Repository"
     self.depends = [self.parent, f"{pkgname}-xml"]
     self.install_if = [self.parent]
+    self.options = ["etcfiles"]
 
     return [
         f"etc/php{_majver}/pear.conf",

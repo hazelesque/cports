@@ -1,5 +1,5 @@
 pkgname = "gst-plugins-bad"
-pkgver = "1.28.2"
+pkgver = "1.28.7"
 pkgrel = 0
 build_style = "meson"
 configure_args = [
@@ -77,6 +77,7 @@ configure_args = [
     "-Dzbar=disabled",  # maybe?
     "-Dzxing=disabled",  # maybe?
     "-Dflite=disabled",  # not packaged, fails with make 4.4
+    "-Disac=disabled",  # requires webrtc-audio-processing-1
 ]
 hostmakedepends = [
     "gettext",
@@ -152,13 +153,13 @@ pkgdesc = "GStreamer bad plugins"
 license = "LGPL-2.1-or-later"
 url = "https://gstreamer.freedesktop.org"
 source = f"{url}/src/gst-plugins-bad/gst-plugins-bad-{pkgver}.tar.xz"
-sha256 = "6467e3964828f4d7d08bfe1fbb4d76287a1c8fa76674e59e101a149c020fefd7"
+sha256 = "dc525383c18b2c265bbe6a43d498656cd918aaa130aa4e3abeabcdaa741c3ffe"
 # FIXME int
 hardening = ["!int"]
 # TODO: a few fails, debug later
 options = ["!check", "!cross"]
 
-if self.profile().endian == "big":
+if self.profile.endian == "big":
     configure_args += [
         "-Dldac=disabled",
         "-Disac=disabled",

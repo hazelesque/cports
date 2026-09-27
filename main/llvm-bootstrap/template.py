@@ -1,5 +1,5 @@
 pkgname = "llvm-bootstrap"
-pkgver = "22.1.6"
+pkgver = "22.1.8"
 pkgrel = 0
 build_style = "cmake"
 configure_args = [
@@ -57,7 +57,7 @@ subdesc = "bootstrap"
 license = "Apache-2.0 WITH LLVM-exception AND NCSA"
 url = "https://llvm.org"
 source = f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{pkgver}/llvm-project-{pkgver}.src.tar.xz"
-sha256 = "6e0b376a1f6d9873e7dfb09ae6e04b9c7024400f01733fa4c29be69d5c138bc2"
+sha256 = "922f1817a0df7b1489272d18134ee0087a8b068828f87ac63b9861b1a9965888"
 debug_level = 0
 # see llvm template
 hardening = ["!int"]
@@ -67,6 +67,7 @@ hardening = ["!int"]
 # runtimes build may invoke built clang during install, which has
 # rpath and fakeroot effectively overrides rpath, so disable that
 options = [
+    "!ci",
     "!lto",
     "!cross",
     "!check",
@@ -84,7 +85,7 @@ tool_flags = {
     "CXXFLAGS": ["-fPIC"],
 }
 
-match self.profile().arch:
+match self.profile.arch:
     case "x86_64":
         _arch = "X86"
     case "aarch64":
@@ -99,12 +100,12 @@ match self.profile().arch:
         _arch = "LoongArch"
     case _:
         _arch = ""
-        broken = f"Unknown CPU architecture: {self.profile().arch}"
+        broken = f"Unknown CPU architecture: {self.profile.arch}"
 
 configure_args += [
     "-DLLVM_TARGET_ARCH=" + _arch,
-    "-DLLVM_HOST_TRIPLE=" + self.profile().triplet,
-    "-DLLVM_DEFAULT_TARGET_TRIPLE=" + self.profile().triplet,
+    "-DLLVM_HOST_TRIPLE=" + self.profile.triplet,
+    "-DLLVM_DEFAULT_TARGET_TRIPLE=" + self.profile.triplet,
 ]
 
 

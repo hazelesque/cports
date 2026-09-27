@@ -124,18 +124,18 @@ hardening = ["!int"]
 # maybe someday
 options = ["!cross", "!check"]
 
-if self.profile().endian == "little":
+if self.profile.endian == "little":
     configure_args += ["--enable-spice"]
     makedepends += ["spice-devel", "spice-protocol"]
 else:
     configure_args += ["--disable-spice"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "not supported anymore"
 
 
 def init_configure(self):
-    ljobs = 4 if self.make_jobs >= 4 else self.make_jobs
+    ljobs = min(4, self.make_jobs)
     # qemu links a lot of big exes at once so ensure there is not more than four
     self.configure_args += [f"-Dbackend_max_links={ljobs}"]
 
@@ -154,7 +154,7 @@ def post_install(self):
 
     self.uninstall("usr/share/doc")
 
-    if self.profile().wordsize == 32:
+    if self.profile.wordsize == 32:
         self.uninstall("usr/lib/qemu/palcode-clipper")
         self.uninstall("usr/lib/qemu/hppa-firmware.img")
         self.uninstall("usr/lib/qemu/hppa-firmware64.img")
@@ -311,7 +311,7 @@ def _(self):
 def _spkg(sname, wordsize):
     do_epkg = True
 
-    if self.profile().wordsize == 32 and wordsize == 64:
+    if self.profile.wordsize == 32 and wordsize == 64:
         do_epkg = False
 
     @subpackage(f"qemu-system-{sname}", do_epkg)

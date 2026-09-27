@@ -1,5 +1,5 @@
 pkgname = "calendarsupport"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 make_check_wrapper = ["wlheadless-run", "--"]
@@ -29,11 +29,11 @@ makedepends = [
 checkdepends = ["xwayland-run"]
 pkgdesc = "KDE library for calendar support"
 license = "LGPL-2.0-or-later AND GPL-3.0-only"
-url = "https://api.kde.org/kdepim/calendarsupport/html"
+url = "https://community.kde.org/KDE_PIM"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/calendarsupport-{pkgver}.tar.xz"
 )
-sha256 = "33938e93ffe71f29d3fd274fce0b7d1e9571763bc99a73a8060f862ab3ccedb9"
+sha256 = "6490d2a70fcf393a8af1daaf571ba0b88972f9ab1b091ffb2dff19ac520423bc"
 
 
 @subpackage("calendarsupport-devel")

@@ -20,7 +20,7 @@ sha256 = [
     "20c48954659cf753baa383ecde0e6f026fadc06c2c9fbe29d88d928188c3ec17",
 ]
 # no tests
-options = ["!check", "bootstrap", "keepempty", "brokenlinks"]
+options = ["etcfiles", "!check", "bootstrap", "keepempty", "brokenlinks"]
 
 
 def install(self):
@@ -69,7 +69,7 @@ def install(self):
     self.install_link("usr/sbin", "bin")
     self.install_link("usr/local/sbin", "bin")
     # wordsized stuff
-    libwn = f"lib{self.profile().wordsize}"
+    libwn = f"lib{self.profile.wordsize}"
     self.install_link(libwn, "lib")
     self.install_link(f"usr/{libwn}", "lib")
     self.install_link(f"usr/local/{libwn}", "lib")

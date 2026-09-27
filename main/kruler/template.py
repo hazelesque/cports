@@ -1,5 +1,5 @@
 pkgname = "kruler"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -25,4 +25,4 @@ pkgdesc = "KDE screen measuring tool"
 license = "GPL-2.0-or-later"
 url = "https://apps.kde.org/kruler"
 source = f"$(KDE_SITE)/release-service/{pkgver}/src/kruler-{pkgver}.tar.xz"
-sha256 = "dcf9aaaf349950bd2f8339653c50c05166da74a19bb92de8f2a8e4e27eb2ebfb"
+sha256 = "a913d993e2cf2b1deaa27b26ba6801a2b20bcf9232b3ff52dfd2f17e4fdaaa29"

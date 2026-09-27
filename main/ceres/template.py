@@ -1,6 +1,6 @@
 pkgname = "ceres"
 pkgver = "2.2.0"
-pkgrel = 0
+pkgrel = 1
 build_style = "cmake"
 configure_args = ["-DBUILD_SHARED_LIBS=ON"]
 hostmakedepends = ["cmake", "ninja", "pkgconf"]
@@ -22,7 +22,7 @@ hardening = ["!int"]
 # a billion executables kills large machines with lots of threads
 options = ["!linkparallel"]
 
-match self.profile().arch:
+match self.profile.arch:
     case "ppc64" | "ppc":
         # vsx assumptions in altivec code
         tool_flags["CXXFLAGS"] += ["-DEIGEN_DONT_VECTORIZE"]

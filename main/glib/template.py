@@ -1,6 +1,7 @@
 pkgname = "glib"
-pkgver = "2.88.1"
-pkgrel = 1
+# update glib-bootstrap when bumping
+pkgver = "2.90.0"
+pkgrel = 0
 build_style = "meson"
 configure_args = [
     "-Ddocumentation=false",
@@ -41,12 +42,12 @@ pkgdesc = "GLib library of C routines"
 license = "LGPL-2.1-or-later"
 url = "https://wiki.gnome.org/Projects/GLib"
 source = f"$(GNOME_SITE)/glib/{pkgver[:-2]}/glib-{pkgver}.tar.xz"
-sha256 = "51ab804c56f6eab3e5045c774d1290ac5e4c923d4f9a3d8e33123bee45c1840e"
+sha256 = "17d15cac2af80a33271127408e0abc2748eb297c595c2a26409e81e14e7d1b8f"
 # FIXME int - strfuncs failure
 hardening = ["!int"]
 
 
-if self.profile().arch == "riscv64":
+if self.profile.arch == "riscv64":
     # ftbfs
     configure_args += ["-Dtests=false"]
 

@@ -1,6 +1,6 @@
 pkgname = "gdk-pixbuf"
-pkgver = "2.44.6"
-pkgrel = 1
+pkgver = "2.44.8"
+pkgrel = 0
 build_style = "meson"
 configure_args = [
     "-Dintrospection=enabled",
@@ -29,13 +29,13 @@ pkgdesc = "Image loading library for GTK"
 license = "LGPL-2.1-or-later"
 url = "https://wiki.gnome.org/Projects/GdkPixbuf"
 source = f"$(GNOME_SITE)/gdk-pixbuf/{pkgver[:-2]}/gdk-pixbuf-{pkgver}.tar.xz"
-sha256 = "140c2d0b899fcf853ee92b26373c9dc228dbcde0820a4246693f4328a27466fa"
+sha256 = "919f529512961a12e81cd4b4b466a48c3933469e7f9a310c6513cd4fb252ba3c"
 # FIXME int
 hardening = ["!int"]
 # check may be disabled
 options = ["!cross"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     # https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/215
     options += ["!check"]
 

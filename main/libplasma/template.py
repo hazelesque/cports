@@ -1,5 +1,5 @@
 pkgname = "libplasma"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 # DialogNativeTest::position() upper_left_y + anchorY is 0 instead of 49
@@ -37,15 +37,16 @@ makedepends = [
     "qt6-qtsvg-devel",
     "qt6-qttools-devel",
     "qt6-qtwayland-devel",
+    "wayland-protocols",
 ]
 checkdepends = [
     "xwayland-run",
 ]
 pkgdesc = "Foundational libraries, components, and tools for Plasma workspaces"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
-url = "https://api.kde.org/plasma/libplasma/html"
+url = "https://kde.org/plasma-desktop"
 source = f"$(KDE_SITE)/plasma/{pkgver}/libplasma-{pkgver}.tar.xz"
-sha256 = "82e02b2098f4bac90f28cdd4f9d3a4da4557440ec8347220d8fee293c1f98d8b"
+sha256 = "27b28823254aa489c094c40a314ce1575fd7906eeb521e636bb8fd2dc2981f2f"
 hardening = ["vis"]
 
 

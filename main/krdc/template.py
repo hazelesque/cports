@@ -1,5 +1,5 @@
 pkgname = "krdc"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -40,7 +40,7 @@ pkgdesc = "KDE remote desktop client"
 license = "GPL-2.0-or-later"
 url = "https://apps.kde.org/krdc"
 source = f"$(KDE_SITE)/release-service/{pkgver}/src/krdc-{pkgver}.tar.xz"
-sha256 = "212b2c2aaa71c1d29f4356ae64785ccca600a565cfe0e03349afcb95d1444a98"
+sha256 = "291ce5f05fc4e67ed659eec9aa8c9f1f06bf1b13a5180375e68d2402341a0ed0"
 
 
 @subpackage("krdc-devel")

@@ -1,5 +1,5 @@
 pkgname = "chrony"
-pkgver = "4.8"
+pkgver = "4.9"
 pkgrel = 0
 build_style = "gnu_configure"
 configure_args = [
@@ -25,7 +25,8 @@ pkgdesc = "NTP client and server"
 license = "GPL-2.0-or-later"
 url = "https://chrony-project.org"
 source = f"https://chrony-project.org/releases/chrony-{pkgver}.tar.gz"
-sha256 = "33ea8eb2a4daeaa506e8fcafd5d6d89027ed6f2f0609645c6f149b560d301706"
+sha256 = "4924c6f530105bcd5b9e9e33c48a2ae1bfd889222c8480bc41601110efc864d0"
+options = ["etcfiles"]
 
 
 def post_install(self):
@@ -33,8 +34,8 @@ def post_install(self):
     self.install_file(
         "examples/chrony.conf.example1", "etc", name="chrony.conf"
     )
-    self.install_sysusers("^/sysusers.conf")
-    self.install_tmpfiles("^/tmpfiles.conf")
+    self.install_sysusers(self.files_path / "sysusers.conf")
+    self.install_tmpfiles(self.files_path / "tmpfiles.conf")
     # dinit services
-    self.install_service("^/chronyd")
-    self.install_service("^/chrony", enable=True)
+    self.install_service(self.files_path / "chronyd")
+    self.install_service(self.files_path / "chrony", enable=True)

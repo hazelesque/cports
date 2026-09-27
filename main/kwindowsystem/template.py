@@ -1,5 +1,5 @@
 pkgname = "kwindowsystem"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 make_check_args = [
@@ -11,8 +11,7 @@ make_check_args = [
     # at least compositingenabled_test is flaky when parallel
     "-j1",
 ]
-make_check_env = {"QT_QPA_PLATFORM": "xcb"}
-make_check_wrapper = ["xvfb-run"]
+make_check_wrapper = ["wlheadless-run", "--"]
 hostmakedepends = [
     "cmake",
     "extra-cmake-modules",
@@ -33,7 +32,7 @@ makedepends = [
     "xcb-util-wm-devel",
 ]
 checkdepends = [
-    "xserver-xorg-xvfb",
+    "xwayland-run",
 ]
 depends = [
     "qqc2-desktop-style",
@@ -42,7 +41,7 @@ pkgdesc = "KDE windowing system access"
 license = "MIT AND (LGPL-2.1-only OR LGPL-3.0-only)"
 url = "https://invent.kde.org/frameworks/kwindowsystem"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kwindowsystem-{pkgver}.tar.xz"
-sha256 = "5f7962b7c986e77c5d25fa4f7d09cd89144b8781e57ebc37fd45eaec1961bb02"
+sha256 = "639a501b877446b19905399d27e2be2b6ebb0bb481abe3209dc4d535a12e12ca"
 hardening = ["vis"]
 
 

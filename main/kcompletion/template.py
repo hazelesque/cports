@@ -1,5 +1,5 @@
 pkgname = "kcompletion"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 make_check_env = {"QT_QPA_PLATFORM": "offscreen"}
@@ -17,9 +17,9 @@ makedepends = [
 ]
 pkgdesc = "KDE Powerful completion framework"
 license = "LGPL-2.1-or-later"
-url = "https://api.kde.org/frameworks/kcompletion/html"
+url = "https://community.kde.org/Frameworks"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kcompletion-{pkgver}.tar.xz"
-sha256 = "95f71eb807e4de40ecdfe7234c9c3d844423171ac52588aecca642f78d904e48"
+sha256 = "96ad9c429ca53b830359c45614ca4c32ed6b759f3023f1b3db1650ba1c19bd58"
 hardening = ["vis"]
 
 

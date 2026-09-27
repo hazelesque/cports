@@ -23,7 +23,7 @@ sha256 = "b535e471fcf0e343687a51e6f9935104eae19d6a328ad75d17e1b280ee8efb95"
 # completions with host bin
 options = ["!check", "!cross"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "needs atomic64"
 
 
@@ -41,11 +41,13 @@ def init_build(self):
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for cmd in ["uv", "uvx"]:
         for shell in ["bash", "fish", "nushell", "zsh"]:
             with open(self.cwd / f"{cmd}.{shell}", "w") as cf:
                 self.do(
-                    f"./target/{self.profile().triplet}/release/{cmd}",
+                    cargo.target_path(self, cmd),
                     "--generate-shell-completion",
                     shell,
                     stdout=cf,

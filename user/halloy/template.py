@@ -1,5 +1,5 @@
 pkgname = "halloy"
-pkgver = "2026.6"
+pkgver = "2026.8"
 pkgrel = 0
 build_style = "cargo"
 hostmakedepends = [
@@ -18,16 +18,18 @@ pkgdesc = "IRC client"
 license = "GPL-3.0-or-later"
 url = "https://halloy.chat"
 source = f"https://github.com/squidowl/halloy/archive/refs/tags/{pkgver}.tar.gz"
-sha256 = "291fe51f1202931251a949d9cf3061c91f04c1259bc3132fd399dbde3365c52d"
+sha256 = "b8206d52f41fac338f9013bd575c2ab5f397fadc9b088e9038f6ad548428f99a"
 # no tests in top-level project
 options = ["!check"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "needs atomic64"
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/halloy")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "halloy"))
     with self.pushd("assets/linux"):
         self.install_file(
             "org.squidowl.halloy.desktop",

@@ -1,6 +1,6 @@
 pkgname = "libportal"
 pkgver = "0.9.1"
-pkgrel = 8
+pkgrel = 10
 build_style = "meson"
 configure_args = [
     "-Ddocs=false",

@@ -1,19 +1,12 @@
 pkgname = "android-tools"
-pkgver = "35.0.2"
-pkgrel = 31
+pkgver = "37.0.0"
+pkgrel = 0
 # only supports specific little-endian archs, particularly in boringssl
-archs = ["x86_64", "aarch64", "ppc64le", "riscv64"]
+archs = ["x86_64", "aarch64", "loongarch64", "ppc64le", "riscv64"]
 build_style = "cmake"
-configure_args = [
-    # until next libusb
-    "-DANDROID_TOOLS_USE_BUNDLED_LIBUSB=ON",
-    "-DANDROID_TOOLS_LIBUSB_ENABLE_UDEV=ON",
-]
 hostmakedepends = [
     "cmake",
-    "go",
     "ninja",
-    "perl",
     "pkgconf",
     "protobuf",
 ]
@@ -24,9 +17,9 @@ makedepends = [
     "libusb-devel",
     "linux-headers",
     "lz4-devel",
+    "musl-bsd-headers",
     "pcre2-devel",
     "protobuf-devel",
-    "udev-devel",
     "zstd-devel",
 ]
 depends = ["android-udev-rules", "python"]
@@ -34,7 +27,7 @@ pkgdesc = "Android platform tools, such as adb and fastboot"
 license = "Apache-2.0 AND ISC AND GPL-2.0-only AND MIT"
 url = "https://github.com/nmeum/android-tools"
 source = f"{url}/releases/download/{pkgver}/android-tools-{pkgver}.tar.xz"
-sha256 = "d2c3222280315f36d8bfa5c02d7632b47e365bfe2e77e99a3564fb6576f04097"
+sha256 = "2725d09f892a3a38e534429f47a321f58ecf6a3169caa42c915fb2cb7d46be0e"
 tool_flags = {"CXXFLAGS": ["-D_LARGEFILE64_SOURCE"]}
 hardening = ["vis", "cfi"]
 

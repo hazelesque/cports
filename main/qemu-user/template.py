@@ -54,12 +54,12 @@ hardening = ["!int"]
 options = ["!cross", "!check", "empty"]
 exec_wrappers = [("/usr/bin/ugetopt", "getopt")]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "not supported anymore"
 
 
 def init_configure(self):
-    ljobs = 4 if self.make_jobs >= 4 else self.make_jobs
+    ljobs = min(4, self.make_jobs)
     # qemu links a lot of big exes at once so ensure there is not more than four
     self.configure_args += [f"-Dbackend_max_links={ljobs}"]
 
@@ -106,7 +106,7 @@ _skip_32bit = {
 def _upkg(uname, wordsize):
     do_epkg = True
 
-    if self.profile().wordsize == 32 and wordsize == 64:
+    if self.profile.wordsize == 32 and wordsize == 64:
         do_epkg = False
 
     @subpackage(f"qemu-user-{uname}", do_epkg)
@@ -118,7 +118,7 @@ def _upkg(uname, wordsize):
 
     do_bpkg = do_epkg
 
-    match self.profile().arch:
+    match self.profile.arch:
         case "armv7":
             curarch = "arm"
         case arch:

@@ -1,6 +1,6 @@
 # also update linux-*-zfs-bin
 pkgname = "zfs"
-pkgver = "2.4.2"
+pkgver = "2.4.4"
 pkgrel = 0
 build_style = "gnu_configure"
 configure_args = [
@@ -35,10 +35,11 @@ source = [
     f"!https://raw.githubusercontent.com/openzfs/zfs/zfs-{pkgver}/contrib/debian/tree/zfs-initramfs/usr/share/initramfs-tools/hooks/zdev>zdev-{pkgver}",
 ]
 sha256 = [
-    "7e260d0e6af295bea4c5e241cac0a1aef07b58d8dd8035f7898ade3b1bbec78f",
+    "2a3c70d55a37cc71618a95a60e81ad66530201eb118d37741dc92efcf848c8b1",
     "84d826261e04de0c1050296e7e9855cc91f431d30b1042104bf1039ddb42195d",
 ]
 hardening = ["!vis", "!cfi"]
+options = ["etcfiles"]
 
 
 def post_extract(self):

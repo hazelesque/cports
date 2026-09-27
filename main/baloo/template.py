@@ -1,5 +1,5 @@
 pkgname = "baloo"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 # flaky tests when parallel
@@ -29,10 +29,11 @@ makedepends = [
 checkdepends = ["dbus"]
 pkgdesc = "KDE Framework for searching and metadata"
 license = "LGPL-3.0-only AND (GPL-2.0-only OR GPL-3.0-only)"
-url = "https://api.kde.org/frameworks/baloo/html"
+url = "https://community.kde.org/Baloo"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/baloo-{pkgver}.tar.xz"
-sha256 = "702f5b868aaef48153c6c3828111b3b335403079491a8f37043ebd89c6995b30"
+sha256 = "a59d33a919bfa1d164c8f3a6f992c609edaf2131ac5f52ea4ecb77f6fbc53be1"
 hardening = ["vis"]
+options = ["etcfiles"]
 
 
 def post_install(self):

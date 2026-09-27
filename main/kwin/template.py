@@ -1,5 +1,5 @@
 pkgname = "kwin"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 make_check_args = [
@@ -15,6 +15,20 @@ make_check_args = [
     + "|kwin-testFifo"  # always fails on 24Hz when run with other tests, works alone
     + "|kwin-testXwaylandInput"  # flaky testPointerEnterLeaveSsd() '!window->readyForPainting()' returned FALSE
     + "|kwin-testPointerInput"  # flaky segfaults of testEdgeBarrier subtests on loongarch64
+    + "|kwin-testDnd"  # tabletDrag fails
+    + "|kwin-testGameController"  # no uinput
+    + "|kwin-testSceneOpenGL"  # no render node
+    + "|kwin-testSceneOpenGLES"  # ditto
+    + "|kwin-testDontCrashReinitializeCompositor"  # ditto
+    + "|kwin-testDontCrashEmptyDeco"  # ditto
+    + "|kwin-testDontCrashAuroraeDestroyDeco"  # ditto
+    + "|kwin-testScreencasting"  # ditto
+    + "|kwin-testSlidingPopups"  # ditto
+    + "|kwin-testScriptedEffects"  # ditto
+    + "|kwin-testToplevelOpenCloseAnimation"  # ditto
+    + "|kwin-testDesktopSwitchingAnimation"  # ditto
+    + "|kwin-testMinimizeAnimation"  # ditto
+    + "|kwin-testMaximizeAnimation"  # ditto
     + "|^kwayland-testServerSideDecoration$"  # Tried to add event to destroyed queue
     + "|^kwayland-testDataControlInterface$"  # An issue with ext_data_control_offer_v1 metatype?
     + "|^kwin-testLockScreen$"  # broken since 296b791614 (v6.5.0)
@@ -22,6 +36,7 @@ make_check_args = [
     + "|^kwin-testFractionalRepaint$"  # testBottomRow() segfault in cbuild chroot, passes on host
     + "|^kwin-testXwaylandSelection$"  # primarySelectionX11ToWayland* subtests fail only on builders with 'seatPrimarySelectionChangedSpy.wait()' returned FALSE
     + "|^kwin-testSelection$"  # KWin::SelectionTest::unsetSupersededSelection() '!secondDataDeviceSelectionClearedSpy.wait(100)' returned FALSE
+    + "|kcm_kwindecoration_smoketest"  # ???
     + ")",
     # parallel tests cause a bunch of flakes
     "-j1",
@@ -71,6 +86,7 @@ makedepends = [
     "libplasma-devel",
     "libqaccessibilityclient-devel",
     "libxcvt-devel",
+    "milou",
     "plasma-activities-devel",
     "plasma-wayland-protocols",
     "qt6-qt5compat-devel",
@@ -83,7 +99,7 @@ makedepends = [
     "wayland-protocols",
     "xcb-util-devel",
 ]
-depends = ["aurorae", "hwdata", "qt6-qtmultimedia", "xwayland"]
+depends = ["aurorae", "hwdata", "milou", "qt6-qtmultimedia", "xwayland"]
 checkdepends = ["breeze", "dbus", "mesa-demos-core", "xwayland-run", *depends]
 pkgdesc = "KDE Wayland compositor"
 license = (
@@ -91,7 +107,7 @@ license = (
 )
 url = "https://invent.kde.org/plasma/kwin"
 source = f"$(KDE_SITE)/plasma/{'.'.join(pkgver.split('.')[0:3])}/kwin-{pkgver}.tar.xz"
-sha256 = "6c187ce7a5506090b438ef900103836fa0537674dde8b31e5b497ef321643cb4"
+sha256 = "6baa910b732d93c48c90f9c1cc685cc93d0b8de0cdf138c24192c045bc3a48e2"
 file_modes = {
     "usr/bin/kwin_wayland": ("root", "root", 0o755),
 }

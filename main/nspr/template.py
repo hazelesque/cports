@@ -1,5 +1,5 @@
 pkgname = "nspr"
-pkgver = "4.38.2"
+pkgver = "4.40"
 pkgrel = 0
 build_wrksrc = "nspr"
 build_style = "gnu_configure"
@@ -11,7 +11,7 @@ pkgdesc = "NetScape Portable Runtime"
 license = "MPL-2.0"
 url = "https://www.mozilla.org/projects/nspr"
 source = f"$(MOZILLA_SITE)/nspr/releases/v{pkgver}/src/nspr-{pkgver}.tar.gz"
-sha256 = "e4092faeab77bdc9b32db1113e4215948ee768e26c4666db3b5a60b35f2c9105"
+sha256 = "c0c1884c627f3db7a783f7c7314c695226b2043696791d15519e7e0578c19bdc"
 tool_flags = {
     "CFLAGS": [
         "-D_PR_POLL_AVAILABLE",
@@ -28,7 +28,7 @@ hardening = ["vis", "!cfi"]
 # no check target
 options = ["!cross", "!check"]
 
-if self.profile().wordsize == 64:
+if self.profile.wordsize == 64:
     configure_args += ["--enable-64bit"]
 
 

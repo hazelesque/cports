@@ -1,5 +1,5 @@
 pkgname = "skanlite"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -23,4 +23,4 @@ pkgdesc = "KDE scanning application for images"
 license = "GPL-2.0-only OR GPL-3.0-only"
 url = "https://apps.kde.org/skanlite"
 source = f"$(KDE_SITE)/release-service/{pkgver}/src/skanlite-{pkgver}.tar.xz"
-sha256 = "a0b41784907b138f90f999de757a38e36b00805bd3cc59dcb2e3ae60b2d02d61"
+sha256 = "7ab83ff5c3d5bfe5e3534a77a5423de88a0ea43850a6a5666551f2e684d87bb2"

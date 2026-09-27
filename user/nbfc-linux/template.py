@@ -15,10 +15,10 @@ tool_flags = {"LDFLAGS": ["-Wl,-z,stack-size=0x200000"]}
 # no tests
 options = ["!check"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "argparser compiletime constant stuff"
 
 
 def post_install(self):
-    self.install_service("^/nbfc")
+    self.install_service(self.files_path / "nbfc")
     self.uninstall("usr/lib/systemd")

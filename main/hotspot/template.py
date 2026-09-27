@@ -1,9 +1,8 @@
 pkgname = "hotspot"
 pkgver = "1.5.1"
-pkgrel = 2
+pkgrel = 3
 build_style = "cmake"
 configure_args = [
-    "-DCMAKE_INSTALL_LIBEXECDIR=libexec",  # TODO switch libexec
     "-DQT6_BUILD=ON",
 ]
 # broken when building out of tree as testdata isn't found relatively
@@ -42,7 +41,7 @@ makedepends = [
 ]
 depends = [
     # gobjdump invocation for disassembly
-    f"binutils-{self.profile().arch}",
+    f"binutils-{self.profile.arch}",
     # graph kpart for callgraph
     "kgraphviewer",
     # konsole kpart for the embedded terminal that shows command output
@@ -73,7 +72,7 @@ sha256 = [
 options = []
 
 
-if self.profile().arch != "x86_64":
+if self.profile.arch != "x86_64":
     # disas tests rely on specific matching string output, so it doesn't match
     # on other architectures
     options += ["!check"]

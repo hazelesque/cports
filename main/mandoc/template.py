@@ -1,6 +1,6 @@
 pkgname = "mandoc"
 pkgver = "1.14.6"
-pkgrel = 6
+pkgrel = 7
 build_style = "configure"
 make_check_target = "regress"
 makedepends = ["zlib-ng-compat-devel"]
@@ -16,8 +16,7 @@ hardening = ["vis", "cfi"]
 
 def pre_configure(self):
     with open(self.cwd / "configure.local", "w") as cf:
-        cf.write(
-            f"""
+        cf.write(f"""
 PREFIX=/usr
 SBINDIR=/usr/bin
 MANDIR=/usr/share/man
@@ -25,38 +24,17 @@ OSNAME="Chimera Linux"
 CFLAGS="{self.get_cflags(shell=True)}"
 LDFLAGS="{self.get_ldflags(shell=True)}"
 CC="{self.get_tool("CC")}"
+LN="ln -sf"
 HAVE_REWB_BSD=0
 UTF8_LOCALE=C.UTF-8
 BINM_PAGER=less
-"""
-        )
+MANPATH_DEFAULT="/usr/local/share/man:/usr/share/man"
+MANPATH_BASE="/usr/share/man"
+""")
 
 
 def post_install(self):
     self.install_license("LICENSE")
-
-    self.install_dir("etc")
-    # from void
-    with open(self.destdir / "etc/man.conf", "w") as conf:
-        conf.write(
-            """# man(1)/apropos(1)/makewhatis(8) configuration, see man.conf(5).
-
-# Default search path for manual pages.
-# Add, delete, or reorder as desired.
-manpath /usr/local/share/man
-manpath /usr/share/man
-"""
-        )
-
-    # drop hardlinks
-    for b in ["apropos", "whatis", "makewhatis", "man"]:
-        fp = self.destdir / f"usr/bin/{b}"
-        fp.unlink()
-        fp.symlink_to("mandoc")
-
-    fp = self.destdir / "usr/share/man/man1/whatis.1"
-    fp.unlink()
-    fp.symlink_to("apropos.1")
 
 
 @subpackage("mandoc-apropos")

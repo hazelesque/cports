@@ -1,5 +1,5 @@
 pkgname = "partitionmanager"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -32,4 +32,4 @@ url = "https://apps.kde.org/partitionmanager"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/partitionmanager-{pkgver}.tar.xz"
 )
-sha256 = "4b0f2fd3883f6b8fa5607ed620dc7b422b33b87829c11e6597a869ea2cd5aa74"
+sha256 = "acbdb57638d75f47b6f07d6ead12af370d3f538858d74523a673548cec771110"

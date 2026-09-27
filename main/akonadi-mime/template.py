@@ -1,5 +1,5 @@
 pkgname = "akonadi-mime"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 # broken for some reason
@@ -27,11 +27,11 @@ makedepends = [
 checkdepends = ["xwayland-run"]
 pkgdesc = "KDE Akonadi mime libraries"
 license = "LGPL-3.0-only"
-url = "https://api.kde.org/kdepim/akonadi-mime/html"
+url = "https://community.kde.org/KDE_PIM"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/akonadi-mime-{pkgver}.tar.xz"
 )
-sha256 = "5d5cbe14a218101d364fd483db16f163240f7b6e02c78c7245c8d1d5752219be"
+sha256 = "344240cc5277cbc0a68c913f6a4a138287adbd7651f9fb7ef36cf10a70538993"
 
 
 @subpackage("akonadi-mime-devel")

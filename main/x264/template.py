@@ -1,6 +1,6 @@
 pkgname = "x264"
-_commit = "cde9a93319bea766a92e306d69059c76de970190"
-pkgver = "20200702"
+_commit = "0480cb05fa188d37ae87e8f4fd8f1aea3711f7ee"
+pkgver = "20250831"
 pkgrel = 1
 build_style = "gnu_configure"
 configure_args = ["--enable-static", "--enable-shared"]
@@ -11,21 +11,18 @@ pkgdesc = "Free library for encoding H264/AVC video streams"
 license = "GPL-2.0-or-later"
 url = "https://www.videolan.org/developers/x264.html"
 source = f"https://code.videolan.org/videolan/x264/-/archive/{_commit}.tar.gz"
-sha256 = "8515baba9f82c723e07252747e9b0e166a16091ba72f2017387641724baec02d"
-# guilty until proven wrong
-hardening = ["!int"]
+sha256 = "d0967a1348c85dfde363bb52610403be898171493100561efa0dd05d5fd1ae50"
 # no check target
-options = ["!check"]
+# lto: miscompiles on some targets
+options = ["!check", "!lto"]
 
-tool_flags = {"CFLAGS": ["-fPIC", "-Wno-incompatible-function-pointer-types"]}
-
-match self.profile().arch:
+match self.profile.arch:
     case "x86_64":
         tools = {"AS": "nasm"}
     case _:
         tools = {"AS": "clang"}
 
-match self.profile().endian:
+match self.profile.endian:
     case "big":
         configure_env = {"CPU_ENDIAN": "big-endian"}
     case _:

@@ -1,5 +1,5 @@
 pkgname = "kfilemetadata"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 # since 6.9 testMetadataSize() depends on fs specifics and fails on bldroot under f2fs/tmpfs
@@ -31,9 +31,9 @@ makedepends = [
 ]
 pkgdesc = "KDE framework for file metadata"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later"
-url = "https://api.kde.org/frameworks/kfilemetadata/html"
+url = "https://community.kde.org/Frameworks"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kfilemetadata-{pkgver}.tar.xz"
-sha256 = "f75942b9a3d1be0b0910cd50a22c3c432ededdc506858c8d5511ddf5498051f2"
+sha256 = "5e14cd8e395e927042cb3eb7cff47e0effda5e8bf2520cf18d1082a9403b2e62"
 hardening = ["vis"]
 # TODO
 options = ["!cross"]

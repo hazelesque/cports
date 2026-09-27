@@ -1,6 +1,6 @@
 pkgname = "drawterm"
-_commit = "48d53278a8273bb39ca295e8f163563ab04b3530"
-pkgver = "0_git20251011"
+_commit = "4c336be61aa3d844ec2fdaa317f1d77d30eb876f"
+pkgver = "0_git20260718"
 pkgrel = 0
 build_style = "makefile"
 make_env = {"CONF": "linux"}
@@ -17,7 +17,7 @@ pkgdesc = "Interface to Plan 9 systems"
 license = "MIT"
 url = "https://drawterm.9front.org"
 source = f"https://git.9front.org/git/plan9front/drawterm/{_commit}/snap.tar.gz>snap-{_commit}.tar.gz"
-sha256 = "9b6e719705c84d3c744524dd39fc96d2fcf34c142c2bd529dad9ad0180f566bc"
+sha256 = "c69531147b109a276944f47b80de2602349feb682ebebe1d018af0c26f82fbdc"
 
 # no tests
 options = ["!check", "!cross"]

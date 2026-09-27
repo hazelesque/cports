@@ -13,7 +13,7 @@ import gzip
 import io
 import re
 
-from cbuild.apk import cli as apkcli
+from cbuild.apk import util as autil
 
 
 # implements version sorting as in gnu sort(1) version sort
@@ -88,9 +88,11 @@ class UpdateCheck:
         self.pkgver = tmpl.pkgver
         self.single_directory = False
         self.pattern = None
+        self.pattern_style = None
         self.group = None
         self.vdprefix = None
         self.vdsuffix = None
+        self.agent_name = "cbuild-update-check"
         self.ignore = []
 
     def _fetch(self, u):
@@ -101,7 +103,7 @@ class UpdateCheck:
             u,
             None,
             {
-                "User-Agent": "cbuild-update-check/4.20.69",
+                "User-Agent": f"{self.agent_name}/4.20.69",
                 "Accept-Encoding": "gzip",
             },
         )
@@ -261,9 +263,20 @@ class UpdateCheck:
         return ret
 
     def fetch_versions(self, url):
+        ps = None
         rx = None
         rxg = None
         pname = self.pkgname
+
+        # some common ones
+        git_forges = [
+            "github.com",
+            "//gitlab.",
+            "salsa.debian.org",
+            "bitbucket.org",
+            "codeberg.org",
+            "git.sr.ht",
+        ]
 
         if not self.url:
             # TODO: cran, crates.io
@@ -287,33 +300,6 @@ class UpdateCheck:
             elif "cpan." in url:
                 if pname == self.template.pkgname:
                     pname = pname.removeprefix("perl-")
-            elif "github.com" in url:
-                pn = "/".join(url.split("/")[3:5])
-                url = f"https://github.com/{pn}/tags.atom"
-                rx = rf"""
-                    /releases/tag/
-                    (v?|V?|{re.escape(pname)}-)?
-                    ([\d.]+)(?=") # match
-                """
-                rxg = 1
-            elif "//gitlab." in url or "salsa.debian.org" in url:
-                pn = "/".join(url.split("/")[0:5])
-                url = f"{pn}/-/tags?format=atom"
-                rx = rf"""
-                    {re.escape(pn)}/-/tags/
-                    (v?|V?|{re.escape(pname)}-)?
-                    ([\d.]+)(?=\") # match
-                """
-                rxg = 1
-            elif "bitbucket.org" in url:
-                pn = "/".join(url.split("/")[3:5])
-                url = f"https://bitbucket.org/{pn}/info/refs?service=git-upload-pack"
-                rx = rf"""
-                    refs/tags/
-                    (v?|V?|{re.escape(pname)}-)?
-                    ([\d.]+)(?!^) # match
-                """
-                rxg = 1
             elif "ftp.gnome.org" in url or "download.gnome.org" in url:
                 rx = rf"""
                     {re.escape(pname)}-
@@ -322,26 +308,13 @@ class UpdateCheck:
                 rxg = 0
                 url = f"https://download.gnome.org/sources/{pname}/cache.json"
             elif "archive.xfce.org" in url:
+                # not a forge but we hijack their gitlab
                 pn = "/".join(url.split("/")[4:6])
-                url = f"https://gitlab.xfce.org/{pn}/-/tags?format=atom"
-                rx = rf"""
-                    {re.escape(pn)}/-/tags/
-                    ({re.escape(pname)}-)?v? # lol
-                    ([\d.]+)(?=\") # match
-                """
-                rxg = 1
+                url = f"https://gitlab.xfce.org/{pn}"
+                ps = "git_forge"
             elif "kernel.org/pub/linux/kernel/" in url:
                 mver = ".".join(self.pkgver.split(".")[0:2])
                 rx = rf"{mver}[\d.]+(?=\.tar\.xz)"
-            elif "codeberg.org" in url:
-                pn = "/".join(url.split("/")[3:5])
-                url = f"https://codeberg.org/{pn}/tags"
-                rx = rf"""
-                    /archive/
-                    (v?|V?|{re.escape(pname)}-)?
-                    ([\d.]+)(?=\.tar\.gz) # match
-                """
-                rxg = 1
             elif "hg.sr.ht" in url:
                 pn = "/".join(url.split("/")[3:5])
                 url = f"https://hg.sr.ht/{pn}/tags"
@@ -351,19 +324,31 @@ class UpdateCheck:
                     ([\d.]+)(?=\.tar\.gz") # match
                 """
                 rxg = 1
-            elif "git.sr.ht" in url:
-                pn = "/".join(url.split("/")[3:5])
-                url = f"https://git.sr.ht/{pn}/info/refs"
-                rx = rf"""
-                    refs/tags/
-                    (v?|V?|{re.escape(pname)}-)?
-                    ([\d.]+)(?!^) # match
-                """
-                rxg = 1
             elif "pkgs.fedoraproject.org" in url:
                 url = f"https://pkgs.fedoraproject.org/repo/pkgs/{pname}"
             elif "pagure.io" in url:
                 url = f"https://pagure.io/{pname}/releases"
+            else:
+                for gf in git_forges:
+                    if gf in url:
+                        ps = "git_forge"
+                        break
+
+        if not ps:
+            ps = self.pattern_style
+
+        match ps:
+            case "git_forge":
+                # explicitly given url is taken as is
+                if not self.url:
+                    url = "/".join(url.split("/")[0:5])
+                url = f"{url}/info/refs?service=git-upload-pack"
+                rx = rf"""
+                    refs/tags/
+                    (v?|V?|{re.escape(pname)}-)?
+                    ([\d.]+)(?=\n) # match
+                """
+                rxg = 1
 
         if self.pattern:
             rx = self.pattern
@@ -448,6 +433,9 @@ def update_check(pkg, verbose=False, error=False):
 
         # variables
 
+        if hasattr(modh, "pattern_style"):
+            uc.pattern_style = modh.pattern_style
+
         if hasattr(modh, "pattern"):
             uc.pattern = modh.pattern
 
@@ -474,6 +462,9 @@ def update_check(pkg, verbose=False, error=False):
 
         if hasattr(modh, "vdsuffix"):
             uc.vdsuffix = modh.vdsuffix
+
+        if hasattr(modh, "agent_name"):
+            uc.agent_name = modh.agent_name
 
     if uc.ignore is True or pkg.build_style == "meta":
         return checkvers
@@ -543,7 +534,7 @@ def update_check(pkg, verbose=False, error=False):
         if ignored:
             continue
 
-        ret = apkcli.compare_version(
+        ret = autil.version_compare(
             uc.pkgver.replace("-", "."), v.replace("-", "."), False
         )
         if ret == -1:

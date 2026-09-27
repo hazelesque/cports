@@ -1,14 +1,14 @@
 pkgname = "ktexttemplate"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = ["cmake", "extra-cmake-modules", "ninja"]
 makedepends = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
 pkgdesc = "KDE library for text templates"
 license = "LGPL-2.1-or-later"
-url = "https://api.kde.org/frameworks/ktexttemplate/html"
+url = "https://community.kde.org/Frameworks"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/ktexttemplate-{pkgver}.tar.xz"
-sha256 = "8b84643c32caf58812fec5a910a1fb98865bc7f91e778af860fa98b79d0ff038"
+sha256 = "c3c229944d25294102e4e8a5b49fa0c0f481da9d33f8bec3782e8a53afd47493"
 hardening = ["vis"]
 
 

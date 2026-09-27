@@ -1,6 +1,6 @@
 # also update ucode-amd when updating
 pkgname = "firmware-linux"
-pkgver = "20251125"
+pkgver = "20260622"
 pkgrel = 0
 hostmakedepends = ["rdfind"]
 pkgdesc = "Binary firmware blobs for the Linux kernel"
@@ -9,10 +9,10 @@ url = "https://www.kernel.org"
 # stuck and eventually generates 502
 # source = f"https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/snapshot/linux-firmware-{pkgver}.tar.gz"
 source = f"https://gitlab.com/kernel-firmware/linux-firmware/-/archive/{pkgver}.tar.gz"
-sha256 = "d6f7e3ec9fe509f81bdb7fb70c56474b7b949cdcb1b75ca0c2b182f004bb2aae"
+sha256 = "39dafafe787291de0010b58ae5828bc631a8f34a5d8f78c26730ff5e37fa5ff5"
 options = ["empty"]
 
-_arch = self.profile().arch
+_arch = self.profile.arch
 _arch_x86 = _arch == "x86_64"
 _arch_arm64 = _arch == "aarch64"
 # These together make up the complete contents; there must be nothing
@@ -67,7 +67,6 @@ _pkgs = [
             "ctspeq.bin*",
         ],
     ),
-    ("cassini", "Sun Cassini Ethernet", None, "network", ["sun/cassini*"]),
     (
         "cnn55xx",
         "Cavium CNN55XX crypto accelerator",
@@ -80,8 +79,9 @@ _pkgs = [
     ("cs35l54", "Cirrus CS35L54 amplifier", None, "audio", ["cirrus/cs35l54*"]),
     ("cs35l56", "Cirrus CS35L56 amplifier", None, "audio", ["cirrus/cs35l56*"]),
     ("cs35l57", "Cirrus CS35L57 amplifier", None, "audio", ["cirrus/cs35l57*"]),
+    ("cs35l63", "Cirrus CS35L63 amplifier", None, "audio", ["cirrus/cs35l63*"]),
     ("cs42l43", "Cirrus CS42L43 amplifier", None, "audio", ["cs42l43.bin*"]),
-    ("cs42l45", "Cirrus CS42L45 codec", None, "audio", ["sdca/1fa/1028"]),
+    ("cs42l45", "Cirrus CS42L45 codec", None, "audio", ["sdca/1fa"]),
     ("cxgb3", "Chelsio T3 10Gb Ethernet", None, "network", ["cxgb3"]),
     ("cxgb4", "Chelsio T4/5/6 Ethernet", None, "network", ["cxgb4"]),
     ("cw1200", "ST-E CW1200 WLAN", None, "network", ["wsm_22.bin*"]),
@@ -96,14 +96,12 @@ _pkgs = [
             "dvb-*.fw*",
             "v4l-cx*.fw*",
             "tlg2300*",
-            "ttusb-budget",
         ],
     ),
     ("e100", "Intel PRO/100 Ethernet", None, "network", ["e100"]),
     ("edgeport", "Edgeport USB Serial Converter", None, "misc", ["edgeport"]),
-    ("emi", "Emagic EMI audo interfaces", None, "misc", ["emi26", "emi62"]),
+    ("emi", "Emagic EMI audo interfaces", None, "misc", ["emi26"]),
     ("ene-ub6250", "ENE UB6250 SD card reader", None, "misc", ["ene-ub6250"]),
-    ("ess", "ESS audio controllers", None, "audio", ["ess"]),
     ("go7007", "WIS GO7007 MPEG encoder", None, "misc", ["go7007"]),
     ("hermes", "Orinoco Hermes WLAN", None, "network", ["agere*"]),
     ("hfi1", "Intel OPA hfi1", _arch_x86, "network", ["hfi1_*.fw*"]),
@@ -202,8 +200,6 @@ _pkgs = [
     ("ixp4xx", "IXP4xx", None, "network", ["ixp4xx"]),
     ("kaweth", "KL5KUSB101 Ethernet", None, "network", ["kaweth"]),
     ("keyspan", "Keyspan serial converters", None, "misc", ["keyspan*"]),
-    ("korg", "Korg audio interfaces", None, "audio", ["korg"]),
-    ("lgs8g75", "Legend Silicon LGS8GXX", None, "misc", ["lgs8g75.fw*"]),
     ("liquidio", "Cavium LiquidIO NICs", None, "network", ["liquidio"]),
     (
         "lt9611uxc",
@@ -212,6 +208,7 @@ _pkgs = [
         "misc",
         ["lt9611uxc_fw.bin*"],
     ),
+    ("lontium", "Lontium bridge", None, "gpu", ["Lontium", "lt87*"]),
     ("mali", "ARM Mali GPUs", _arch_arm64, "gpu", ["arm/mali"]),
     ("matrox", "Matrox G200/400", None, "gpu", ["matrox"]),
     (
@@ -223,7 +220,6 @@ _pkgs = [
             "mediatek/mt798*",
             "mediatek/mt81*",
             "mediatek/sof",
-            "vpu_*.bin*",
         ],
     ),
     (
@@ -270,7 +266,7 @@ _pkgs = [
         "Myricom Ethernet NICs",
         None,
         "network",
-        ["myri10ge*", "myricom"],
+        ["myri10ge*"],
     ),
     ("nfp", "Netronome Flow Processor", None, None, ["netronome"]),
     ("nxp-uwb", "NXP UWB firmware", None, "network", ["nxp/sr150_fw.bin*"]),
@@ -286,6 +282,7 @@ _pkgs = [
             "nxp/uartuart*",
         ],
     ),
+    ("nxp-wifi", "NXP WiFi firmware", None, "network", ["nxp/sd_w*"]),
     (
         "nvidia-gsp",
         "Nvidia GSP",
@@ -321,6 +318,7 @@ _pkgs = [
     ),
     ("radeon", "Older AMD GPUs", None, "gpu", ["radeon"]),
     ("ralink", "Ralink WLAN", None, "network", ["rt*.bin*"]),
+    ("rcar", "R-Car SoC", _arch_arm64, "soc", ["rcar*"]),
     ("rockchip", "Rockchip SoCs", _arch_arm64, "soc", ["rockchip"]),
     ("rp2", "Comtrol RocketPort 2", None, "misc", ["rp2.fw*"]),
     ("rsi", "Redpine RSI91X WLAN/Bluetooth", None, "network", ["rsi*"]),
@@ -381,9 +379,18 @@ _pkgs = [
         "Texas Instruments amplifiers",
         None,
         "audio",
-        ["INT88*", "TAS2*", "TIAS2*", "TXNW*", "ti/audio/tas*"],
+        [
+            "INT88*",
+            "TAS2*",
+            "TIAS2*",
+            "TXNW*",
+            "tas25*",
+            "ti/audio/tas*",
+            "ti/pcm6240",
+            "*-*-0x*.bin*",
+        ],
     ),
-    ("tigon", "Tigon I/II/III Ethernet", None, "network", ["acenic", "tigon"]),
+    ("tigon", "Tigon I/II/III Ethernet", None, "network", ["tigon"]),
     (
         "tsse",
         "Mont-TSSE crypto algorithm accelerator",
@@ -393,7 +400,6 @@ _pkgs = [
     ),
     ("typhoon", "3Com Typhoon Ethernet", None, "network", ["3com"]),
     ("ueagle-atm", "Eagle USB modems", None, "network", ["ueagle-atm"]),
-    ("vicam", "ViCam USB camera", None, "misc", ["vicam"]),
     ("vntwusb", "Via VNT6656 USB WLAN", None, "network", ["vntwusb.fw*"]),
     (
         "vsc85xx",
@@ -431,13 +437,11 @@ def install(self):
     )
 
     self.install_license("WHENCE")
+    self.install_license("LICENSE")
 
-    for lc in self.cwd.glob("LICEN*"):
+    for lc in (self.cwd / "LICENSES").glob("LICEN*"):
         self.install_license(lc)
 
-
-# remove unused junk
-def post_install(self):
     # deprecated driver
     self.uninstall("usr/lib/firmware/av7110")
     # pcmcia stuff unlikely to ever be used
@@ -463,7 +467,6 @@ def post_install(self):
     self.uninstall("usr/lib/firmware/usbdux_firmware.bin*", glob=True)
     self.uninstall("usr/lib/firmware/usbduxfast_firmware.bin*", glob=True)
     self.uninstall("usr/lib/firmware/usbduxsigma_firmware.bin*", glob=True)
-    self.uninstall("usr/lib/firmware/yam")
 
     # fix up nvidia gsp firmware links to allow take() to function correctly
     def _fixup_gsp(f):

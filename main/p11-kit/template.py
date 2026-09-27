@@ -1,9 +1,8 @@
 pkgname = "p11-kit"
-pkgver = "0.25.10"
+pkgver = "0.26.4"
 pkgrel = 0
 build_style = "meson"
 configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
     "-Dlibffi=enabled",
     "-Dsystemd=disabled",
     "-Dbash_completion=disabled",
@@ -27,7 +26,8 @@ pkgdesc = "Provides a way to load and enumerate PKCS#11 modules"
 license = "BSD-3-Clause"
 url = "https://github.com/p11-glue/p11-kit"
 source = f"{url}/releases/download/{pkgver}/p11-kit-{pkgver}.tar.xz"
-sha256 = "a62a137a966fb3a9bbfa670b4422161e369ddea216be51425e3be0ab2096e408"
+sha256 = "89c3ffb10e076ee036e14732bf6547a1e1c4fb48699a5dee7ceb5ce4f7c0c462"
+options = ["etcfiles"]
 
 
 def post_install(self):

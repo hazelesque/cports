@@ -1,5 +1,5 @@
 pkgname = "rust-bootstrap"
-pkgver = "1.94.1"
+pkgver = "1.97.1"
 pkgrel = 0
 # satisfy revdeps
 makedepends = ["zlib-ng-compat", "ncurses-libs", "zstd"]
@@ -10,49 +10,39 @@ license = "MIT OR Apache-2.0"
 url = "https://rust-lang.org"
 _urlb = "https://repo.chimera-linux.org/distfiles"
 source = [
-    f"{_urlb}/rustc-{pkgver}-{self.profile().triplet}.tar.xz",
-    f"{_urlb}/rust-std-{pkgver}-{self.profile().triplet}.tar.xz",
+    f"{_urlb}/rustc-{pkgver}-{self.profile.triplet}.tar.xz",
+    f"{_urlb}/rust-std-{pkgver}-{self.profile.triplet}.tar.xz",
 ]
 options = ["!strip"]
 
-match self.profile().arch:
+match self.profile.arch:
     case "aarch64":
         sha256 = [
-            "4eba2273b053c45c9b07679ff6c396a97502a7b12defe9dbf18f3e99c8dfef1f",
-            "29c3a06838003399a819528366f1dbe09231ae995dcfcb4ab0378a3367337d2e",
+            "15ec31bbe0694ab27e249aed561206a7e31144d7b98ba84175c5c69696aff473",
+            "f87616712a3fd7c562682d377be50c6e838c73876c128069b90898ecc0a7c055",
         ]
     case "loongarch64":
         sha256 = [
-            "a7526f0908555b48796a1b5362c71d12e1099b30ed96fb25e6432ee62d62519a",
-            "cd3da285b605010b6acefea8debbe6a39ab3c8067a0475f7c0d46fcc92fb26ae",
+            "413ec6e70f030a7a9863843b54c889eb256c981375e3da8e382a02eb9cd65956",
+            "2097a7ac6212fdf843d94bc4aba25811bbe154ec13a1a24a009d6a45c82c08e9",
         ]
     case "ppc64le":
         sha256 = [
-            "6bf285265729f4bed996614ac528ada4da7a97fc56cce219b50406edd8b9bbc1",
-            "bae9c744366cf74a3ebdcc8ee6a4435bd9731ae78ccba6c1c339381c973a7d5d",
-        ]
-    case "ppc64":
-        sha256 = [
-            "4594921821fbb8fbb882b771c857a34ed9958786ddc41d44ac9f6b448e5033fa",
-            "b8b09d6c94355674aa25ee7326af88f66400509a46be233f6323b13968d84e96",
-        ]
-    case "ppc":
-        sha256 = [
-            "e7608902dd1ebb56bfa520274970a6ea145e58d9ed3950c61eb3bd4ac050139f",
-            "2a1ece44bb0bf133f7b636f138e3611b9636aa516af327a32028b0b02cedac78",
+            "d7f3f59dccb9ed15106359987c2c0e8249f172d82b5f2eaf7a315921e596717f",
+            "d58717459413cc4e54d02c7a6aa692c304bcabe62ae06447518ff1c6ae4d0cbf",
         ]
     case "riscv64":
         sha256 = [
-            "18da00479f89fd19a31416ac54e8dcdbbecdd90663bb4b433e08c4e0a5b76e41",
-            "261bf4c5f48cb945feb4699a030001424c75239dcfaddb3c3a5b7d8acb8f18a8",
+            "2cd33f31c80d9afc218354880e0702d9fac0c15ef4d20fd9458715acfc484d71",
+            "a3167a791e289b16b8bbee52d6311abb06b68516e9215b58ecf2a9ad07b133d7",
         ]
     case "x86_64":
         sha256 = [
-            "45b0b6a05839f8a37dee99d7b5b414deca153c31ed4cc0a85713f58baa3cb0c1",
-            "e53829f1291417192b3c7655ff5c7bc1fcd28e72e6bd503c955e7a6c0da8846e",
+            "0d02f471281bdb3617616bd151d97779731ec6b53932328455d8c91860524c45",
+            "7476a7f7c24efa02b9b2d80ba568b1466ed364d94eddf8a3d542943e3134d610",
         ]
     case _:
-        broken = f"not yet built for {self.profile().arch}"
+        broken = f"not yet built for {self.profile.arch}"
 
 
 def install(self):
@@ -64,9 +54,9 @@ def install(self):
             wrksrc=d.name,
         )
     # remove rust copies of llvm tools
-    trip = self.profile().triplet
+    trip = self.profile.triplet
     self.uninstall(f"usr/lib/rustlib/{trip}/bin")
     # whatever
     self.uninstall("usr/etc")
     # licenses
-    self.install_license(f"rustc-{pkgver}-{self.profile().triplet}/LICENSE-MIT")
+    self.install_license(f"rustc-{pkgver}-{self.profile.triplet}/LICENSE-MIT")

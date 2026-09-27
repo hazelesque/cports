@@ -1,5 +1,5 @@
 pkgname = "kitemmodels"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 make_check_env = {"QT_QPA_PLATFORM": "offscreen"}
@@ -7,9 +7,9 @@ hostmakedepends = ["cmake", "extra-cmake-modules", "ninja"]
 makedepends = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
 pkgdesc = "KDE's item models extending the Qt model-view framework"
 license = "LGPL-2.0-only AND LGPL-2.0-or-later"
-url = "https://api.kde.org/frameworks/kitemmodels/html"
+url = "https://community.kde.org/Frameworks"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kitemmodels-{pkgver}.tar.xz"
-sha256 = "a996201062ff7d21f9db972debc2d9615762ddb0fd9da069a42b7fd7bba1e61d"
+sha256 = "f807e5b37aa913d2563ee1a21b2bce7d34495f32f38c7f35f16262d736bdfd55"
 hardening = ["vis"]
 
 

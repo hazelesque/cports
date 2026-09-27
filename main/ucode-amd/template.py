@@ -1,13 +1,13 @@
 # keep in sync with firmware-linux
 pkgname = "ucode-amd"
-pkgver = "20251125"
+pkgver = "20260622"
 pkgrel = 0
 archs = ["x86_64"]
 makedepends = ["firmware-linux-amd-ucode"]
 pkgdesc = "AMD CPU microcode"
 license = "custom:linux-firmware"
 url = "https://www.kernel.org"
-options = ["!strip", "foreignelf", "!distlicense"]
+options = ["etcfiles", "!strip", "foreignelf", "!distlicense"]
 
 
 def build(self):

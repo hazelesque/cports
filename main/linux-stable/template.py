@@ -1,13 +1,11 @@
 # update linux-stable-zfs-bin when bumping
 pkgname = "linux-stable"
-pkgver = "7.0.9"
+pkgver = "7.2.2"
 pkgrel = 0
 archs = [
     "aarch64",
     "loongarch64",
     "ppc64le",
-    "ppc64",
-    "ppc",
     "riscv64",
     "x86_64",
 ]
@@ -22,9 +20,10 @@ pkgdesc = f"Linux kernel {pkgver[0 : pkgver.rfind('.')]}.x"
 license = "GPL-2.0-only"
 url = "https://kernel.org"
 source = f"https://cdn.kernel.org/pub/linux/kernel/v{pkgver[0]}.x/linux-{pkgver}.tar.xz"
-sha256 = "ac07acdf76cf4621cc5187a2670270a1a699533c8a6b225e4878c416ad83f1c4"
+sha256 = "7d0e7ce14f98c43efe880cffbf354a59be45928fdf7170d7333c374ae91c0d83"
 # no meaningful checking to be done
 options = [
+    "!ci",
     "!check",
     "!debug",
     "!strip",
@@ -38,7 +37,7 @@ options = [
 
 if self.current_target == "custom:generate-configs":
     hostmakedepends += ["base-cross", "ncurses-devel"]
-elif self.profile().cross:
+elif self.profile.cross:
     broken = "linux-devel does not come out right"
 
 

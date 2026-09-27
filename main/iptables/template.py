@@ -1,9 +1,8 @@
 pkgname = "iptables"
-pkgver = "1.8.11"
+pkgver = "1.8.13"
 pkgrel = 0
 build_style = "gnu_configure"
 configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
     "--enable-devel",
     "--enable-shared",
     "--enable-bpf-compiler",
@@ -32,9 +31,9 @@ pkgdesc = "Linux packet filtering system"
 license = "GPL-2.0-only"
 url = "https://www.netfilter.org/projects/iptables"
 source = f"{url}/files/iptables-{pkgver}.tar.xz"
-sha256 = "d87303d55ef8c92bcad4dd3f978b26d272013642b029425775f5bad1009fe7b2"
+sha256 = "1afcd33da9e8f913ace6a2126788162e207e26f5d5e29c6573c0e581ffc58b99"
 # check: wants /etc/ethertypes installed
-options = ["!check"]
+options = ["etcfiles", "!check"]
 
 
 @subpackage("iptables-libs")
@@ -63,8 +62,8 @@ def post_install(self):
     fpath = self.files_path
 
     # service-related bits
-    self.install_file(fpath / "iptables-flush", "usr/libexec", mode=0o755)
-    self.install_file(fpath / "iptables-start", "usr/libexec", mode=0o755)
+    self.install_file(fpath / "iptables-flush", "usr/lib", mode=0o755)
+    self.install_file(fpath / "iptables-start", "usr/lib", mode=0o755)
     self.install_service(self.files_path / "iptables")
     self.install_service(self.files_path / "ip6tables")
     self.install_tmpfiles(self.files_path / "tmpfiles.conf")

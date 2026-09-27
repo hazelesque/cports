@@ -1,7 +1,7 @@
 pkgname = "python"
-pkgver = "3.14.5"
+pkgver = "3.14.6"
 _majver = pkgver[: pkgver.rfind(".")]
-pkgrel = 0
+pkgrel = 1
 build_style = "gnu_configure"
 configure_args = [
     "--enable-ipv6",
@@ -59,6 +59,7 @@ makedepends = [
     "sqlite-devel",
     "xz-devel",
     "zlib-ng-compat-devel",
+    "zstd-devel",
 ]
 checkdepends = ["ca-certificates"]
 depends = [self.with_pkgver("python-meta"), "ca-certificates"]
@@ -68,7 +69,7 @@ pkgdesc = "Python programming language"
 license = "Python-2.0"
 url = "https://python.org"
 source = f"https://python.org/ftp/python/{pkgver}/Python-{pkgver}.tar.xz"
-sha256 = "7e32597b99e5d9a39abed35de4693fa169df3e5850d4c334337ffd6a19a36db6"
+sha256 = "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63"
 # use a chunky stack; python by default does not use more than 1 thread
 # but anything dlopened from it will be stuck with the default stacksize
 # (e.g. python gtk programs, gtk loads icons from a threadpool and it may
@@ -88,23 +89,23 @@ env = {
     "LDFLAGS": "",
 }
 
-if self.profile().cross:
+if self.profile.cross:
     hostmakedepends += ["python"]
     configure_args += [f"--with-build-python=python{_majver}"]
 
 _has_tail = True
 
-match self.profile().arch:
+match self.profile.arch:
     case "ppc" | "ppc64" | "ppc64le":
         _has_tail = False
 
 
 def init_configure(self):
-    if not self.profile().cross and self.has_lto():
+    if not self.profile.cross and self.has_lto():
         self.configure_args += ["--enable-optimizations"]
         if _has_tail:
             self.configure_args += ["--with-tail-call-interp"]
-    bigend = "yes" if (self.profile().endian == "big") else "no"
+    bigend = "yes" if (self.profile.endian == "big") else "no"
     self.configure_args.append("ax_cv_c_float_words_bigendian=" + bigend)
     # real configure and linker flags here
     self.env["CFLAGS_NODIST"] = self.get_cflags(shell=True)

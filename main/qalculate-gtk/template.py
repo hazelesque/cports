@@ -1,11 +1,8 @@
 pkgname = "qalculate-gtk"
 # match to libqalculate
-pkgver = "5.10.0"
+pkgver = "5.12.0"
 pkgrel = 0
 build_style = "gnu_configure"
-configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
-]
 hostmakedepends = [
     "automake",
     "gettext-devel",
@@ -22,4 +19,4 @@ pkgdesc = "GTK+3 frontend for libqalculate"
 license = "GPL-2.0-or-later"
 url = "https://qalculate.github.io"
 source = f"https://github.com/Qalculate/qalculate-gtk/releases/download/v{pkgver}/qalculate-gtk-{pkgver}.tar.gz"
-sha256 = "310875ae42d4af3bef46bb5f0405496c26e8e8abe218caeb1270cde176c02691"
+sha256 = "4225eacefc30354f867dc14b7974efe8e8fcef031117def1098db652e1ad48b7"

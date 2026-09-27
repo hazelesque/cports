@@ -1,5 +1,6 @@
+# keep in sync with user/wine-staging
 pkgname = "wine"
-pkgver = "11.1"
+pkgver = "11.15"
 pkgrel = 0
 archs = ["aarch64", "x86_64"]
 build_style = "gnu_configure"
@@ -57,7 +58,7 @@ license = "LGPL-2.1-or-later"
 url = "https://www.winehq.org"
 # the url is .0 for .0 and .x for >0
 source = f"https://dl.winehq.org/wine/source/11.x/wine-{pkgver}.tar.xz"
-sha256 = "bf4c7c8fb5d8c1f656f30a2bea93870c85f13ff8311ab2f61ddef900eb28cb8f"
+sha256 = "5046f36dae210b198ea69792774d4401feed975d465eca6c251c9394400ec272"
 # FIXME: int breaks wine
 # trivial-auto-var-init relies on memset() symbol existing during link for vars
 # which isn't the case for loader/preloader.o:(map_so_lib)
@@ -67,7 +68,7 @@ hardening = ["!int", "!var-init"]
 # check: tests hard to run, etc, meh
 options = ["!lto", "!check"]
 
-match self.profile().arch:
+match self.profile.arch:
     case "x86_64":
         configure_args += ["--enable-archs=x86_64,i386"]
 

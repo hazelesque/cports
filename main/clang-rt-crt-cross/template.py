@@ -1,6 +1,6 @@
 pkgname = "clang-rt-crt-cross"
 _musl_ver = "1.2.6"
-pkgver = "22.1.6"
+pkgver = "22.1.8"
 pkgrel = 0
 build_style = "cmake"
 configure_args = [
@@ -47,7 +47,7 @@ source = [
 ]
 source_paths = [".", "musl"]
 sha256 = [
-    "6e0b376a1f6d9873e7dfb09ae6e04b9c7024400f01733fa4c29be69d5c138bc2",
+    "922f1817a0df7b1489272d18134ee0087a8b068828f87ac63b9861b1a9965888",
     "d585fd3b613c66151fc3249e8ed44f77020cb5e6c1e635a616d3f9f82460512a",
 ]
 # crosstoolchain
@@ -71,14 +71,14 @@ _targetlist = [
     "riscv64",
     "loongarch64",
 ]
-_targets = sorted(filter(lambda p: p != self.profile().arch, _targetlist))
+_targets = sorted(filter(lambda p: p != self.profile.arch, _targetlist))
 
 
 def configure(self):
     from cbuild.util import cmake
 
     for an in _targets:
-        with self.profile(an) as pf:
+        with self.use_profile(an) as pf:
             at = pf.triplet
             # musl build dir
             self.mkdir(f"musl/build-{an}", parents=True)
@@ -134,7 +134,7 @@ def build(self):
     from cbuild.util import cmake
 
     for an in _targets:
-        with self.profile(an):
+        with self.use_profile(an):
             with self.stamp(f"{an}_build") as s:
                 s.check()
                 cmake.build(self, f"build-{an}")
@@ -144,7 +144,7 @@ def install(self):
     from cbuild.util import cmake
 
     for an in _targets:
-        with self.profile(an):
+        with self.use_profile(an):
             cmake.install(self, f"build-{an}")
     self.install_license("LICENSE.TXT")
 
@@ -160,7 +160,7 @@ def _gen_subp(an):
             "!splitstatic",
             "foreignelf",
         ]
-        with self.rparent.profile(an) as pf:
+        with self.rparent.use_profile(an) as pf:
             return [
                 f"usr/lib/clang/{pkgver[0 : pkgver.find('.')]}/lib/{pf.triplet}"
             ]

@@ -1,5 +1,5 @@
 pkgname = "kpimtextedit"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 # hangs
@@ -28,11 +28,11 @@ makedepends = [
 ]
 pkgdesc = "KDE PIM textedit class"
 license = "LGPL-2.1-or-later"
-url = "https://api.kde.org/kdepim/kpimtextedit/html"
+url = "https://community.kde.org/KDE_PIM"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/kpimtextedit-{pkgver}.tar.xz"
 )
-sha256 = "2670cc61039c82b3e19ec36686cfa73ac81f19ae18f4cf885a0ace4b3df80582"
+sha256 = "e8cd1bdcd58af6c7eac9ede5ec00c635766e9d32c3922e766028cb0c26eb7163"
 
 
 @subpackage("kpimtextedit-devel")

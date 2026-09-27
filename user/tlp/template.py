@@ -1,6 +1,6 @@
 pkgname = "tlp"
-pkgver = "1.8.0"
-pkgrel = 1
+pkgver = "1.10.2"
+pkgrel = 0
 build_style = "makefile"
 make_install_args = [
     "-j1",
@@ -10,6 +10,7 @@ make_install_args = [
     "TLP_NO_INIT=1",
     "TLP_WITH_ELOGIND=1",
     "TLP_WITH_SYSTEMD=0",
+    "install-man",
 ]
 makedepends = ["dinit-chimera"]
 depends = ["perl", "ethtool", "hdparm"]
@@ -17,13 +18,13 @@ pkgdesc = "Battery life optimization utility"
 license = "GPL-2.0-or-later"
 url = "https://linrunner.de/tlp"
 source = f"https://github.com/linrunner/TLP/archive/refs/tags/{pkgver}.tar.gz"
-sha256 = "65515f7652064a1be2940c031e045b762924bb1dbd94f5e58e3b765113cf5210"
+sha256 = "a0b8bd8193d96853d2876c552b3b2bdf46bd1258fffc9ac598acc67eb73b56d5"
 # no tests, symlinked commands
-options = ["!check", "!lintcomp"]
+options = ["etcfiles", "!check", "!lintcomp"]
 
 
 def post_install(self):
-    self.install_service("^/tlp")
+    self.install_service(self.files_path / "tlp")
 
 
 @subpackage("tlp-rdw")
@@ -38,4 +39,5 @@ def _(self):
         "usr/share/man/man8/tlp-rdw.8",
         "usr/share/zsh/site-functions/_tlp-rdw",
         "usr/share/bash-completion/completions/tlp-rdw",
+        "usr/share/fish/vendor_completions.d/tlp-rdw.fish",
     ]

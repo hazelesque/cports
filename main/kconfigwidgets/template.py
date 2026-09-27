@@ -1,7 +1,9 @@
 pkgname = "kconfigwidgets"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
+# relies on clipboard presence in kwidgetsaddons
+make_check_args = ["-E", "kconfigdialog_unittest"]
 make_check_env = {"QT_QPA_PLATFORM": "offscreen"}
 make_check_wrapper = ["dbus-run-session"]
 hostmakedepends = [
@@ -29,7 +31,7 @@ pkgdesc = "KDE Widgets for configuration dialogs"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later"
 url = "https://develop.kde.org/docs/features/kconfigwidgets"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kconfigwidgets-{pkgver}.tar.xz"
-sha256 = "3babcef22aea293fad0db65fcdbf76eb4ac9077bc758ee8daec108090242ea3c"
+sha256 = "6efd9fc7786a7e979b32904aeadf1d2d8e69a5da110f8ebd45f95ec02de41f77"
 hardening = ["vis"]
 
 

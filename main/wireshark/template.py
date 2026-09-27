@@ -1,12 +1,12 @@
 pkgname = "wireshark"
-pkgver = "4.4.8"
-pkgrel = 0
+pkgver = "4.7.2"
+pkgrel = 1
 build_style = "cmake"
 configure_args = [
     "-DENABLE_GNUTLS=ON",
     "-DENABLE_LUA=ON",
     "-DENABLE_DEBUG=OFF",
-    "-DUSE_qt6=ON",
+    "-DENABLE_WERROR=OFF",
 ]
 make_build_args = ["--target", "all", "test-programs"]
 hostmakedepends = [
@@ -58,7 +58,7 @@ pkgdesc = "Network protocol analyzer"
 license = "GPL-2.0-or-later"
 url = "https://www.wireshark.org"
 source = f"https://www.wireshark.org/download/src/all-versions/wireshark-{pkgver}.tar.xz"
-sha256 = "dd648c5c5994843205cd73e57d6673f6f4e12718e1c558c674cb8bdafeacde47"
+sha256 = "f94df4731d9fcb86240950fde44b3db52ffdd04e918b558e613891d0b578dadc"
 file_modes = {
     "usr/bin/dumpcap": ("root", "root", 0o755),
 }
@@ -82,4 +82,4 @@ def check(self):
 
 
 def post_install(self):
-    self.install_sysusers("^/wireshark.conf")
+    self.install_sysusers(self.files_path / "wireshark.conf")

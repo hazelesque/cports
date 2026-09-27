@@ -1,9 +1,9 @@
 pkgname = "libssh2"
 pkgver = "1.11.1"
-pkgrel = 0
+pkgrel = 1
 build_style = "gnu_configure"
 configure_args = [
-    f"--with-libssl-prefix={self.profile().sysroot / 'usr'}",
+    f"--with-libssl-prefix={self.profile.sysroot / 'usr'}",
     "--disable-docker-tests",
 ]
 configure_gen = []

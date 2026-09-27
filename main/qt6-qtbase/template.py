@@ -1,7 +1,7 @@
 # rebuild qt6-qtbase-private-devel consumers on upgrades
 pkgname = "qt6-qtbase"
-pkgver = "6.11.0"
-pkgrel = 0
+pkgver = "6.11.2"
+pkgrel = 1
 build_style = "cmake"
 configure_args = [
     "-DBUILD_WITH_PCH=OFF",
@@ -45,6 +45,7 @@ makedepends = [
     "icu-devel",
     "libb2-devel",
     "libinput-devel",
+    "libjpeg-turbo-devel",
     "libpng-devel",
     "libproxy-devel",
     "libxcb-devel",
@@ -74,18 +75,18 @@ license = (
 )
 url = "https://www.qt.io"
 source = f"https://download.qt.io/official_releases/qt/{pkgver[:-2]}/{pkgver}/submodules/qtbase-everywhere-src-{pkgver}.tar.xz"
-sha256 = "231ad85979864d914dc9568a1b71c91d6cf20d7b2021d059103bf0eb51cb755e"
+sha256 = "5b2e00eccaf5a4d8c14134ffa0ea8dfd0a35ae1ffc7f8d87fa4305a1ed23cf22"
 tool_flags = {"LDFLAGS": ["-Wl,-z,stack-size=0x200000"]}
 # FIXME
 hardening = ["!int"]
 # TODO
 options = ["!cross"]
 
-if self.profile().cross:
+if self.profile.cross:
     hostmakedepends += ["qt6-qtbase"]
     configure_args += ["-DQT_FORCE_BUILD_TOOLS=ON"]
 
-if self.profile().arch == "riscv64":
+if self.profile.arch == "riscv64":
     # https://bugreports.qt.io/browse/QTBUG-98951
     # our riscv64 is currently emulated, so this breaks anything using qmake from building
     # just disable it on the arch for now, as it falls back to fork and works anyway
@@ -240,6 +241,12 @@ def _libpkg(name, libname, desc, extra=[]):
     @subpackage(f"qt6-qtbase-{name}")
     def _(self):
         self.subdesc = desc
+
+        if name == "core":
+            self.depends += [
+                "virtual:qt6-qttranslations!qt6-qtbase-translations-none"
+            ]
+
         return [f"usr/lib/libQt6{libname}.so.*", *extra]
 
 
@@ -324,3 +331,13 @@ def _(self):
             "usr/lib/*.prl",
         ]
     )
+
+
+@subpackage("qt6-qtbase-translations-none")
+def _(self):
+    self.subdesc = "no translations"
+    self.provides = ["qt6-qttranslations=0"]
+    self.install_if = [self.with_pkgver("qt6-qtbase-core"), "!base-locale"]
+    self.options = ["empty"]
+
+    return []

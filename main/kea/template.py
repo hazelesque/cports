@@ -21,14 +21,15 @@ license = "MPL-2.0"
 url = "https://kea.isc.org"
 source = f"https://downloads.isc.org/isc/kea/cur/{pkgver[: pkgver.rfind('.')]}/kea-{pkgver}.tar.xz"
 sha256 = "29f4e44fa48f62fe15158d17411e003496203250db7b3459c2c79c09f379a541"
+options = ["etcfiles"]
 
 
 def post_install(self):
-    self.install_tmpfiles("^/tmpfiles.conf")
-    self.install_service("^/kea-ctrl-agent")
-    self.install_service("^/kea-dhcp-ddns")
-    self.install_service("^/kea-dhcp4")
-    self.install_service("^/kea-dhcp6")
+    self.install_tmpfiles(self.files_path / "tmpfiles.conf")
+    self.install_service(self.files_path / "kea-ctrl-agent")
+    self.install_service(self.files_path / "kea-dhcp-ddns")
+    self.install_service(self.files_path / "kea-dhcp4")
+    self.install_service(self.files_path / "kea-dhcp6")
 
 
 @subpackage("kea-devel")

@@ -1,5 +1,5 @@
 pkgname = "wireplumber"
-pkgver = "0.5.13"
+pkgver = "0.5.17"
 pkgrel = 0
 build_style = "meson"
 configure_args = [
@@ -29,7 +29,7 @@ pkgdesc = "Session and policy manager implementation for PipeWire"
 license = "MIT"
 url = "https://pipewire.pages.freedesktop.org/wireplumber"
 source = f"https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/{pkgver}/wireplumber-{pkgver}.tar.gz"
-sha256 = "904e4219dacfc6070e13fcb41846b085c61aa1c1cbb0dcc59e1ab982adc8968a"
+sha256 = "13d1e4456e64bcc81111ec5a4af75d0bd6316040c5718b388b14103a8a77cc6b"
 
 
 def post_install(self):

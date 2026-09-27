@@ -16,7 +16,7 @@ makedepends = [
     "qt6-qtwebengine-devel",
     "signond-devel",
 ]
-checkdepends = ["dbus-test-runner", "xserver-xorg-xvfb"]
+checkdepends = ["dbus-test-runner", "xwayland-run"]
 pkgdesc = "Qt UI for signond"
 license = "GPL-3.0-only"
 url = "https://gitlab.com/accounts-sso/signon-ui"
@@ -25,7 +25,6 @@ sha256 = "0906a1adee88e331e9dcf1f2d5978c24f8564fb734f5c114c88bddb63196d3d4"
 
 
 def configure(self):
-    # TODO: build style these
     self.do(
         "qmake6",
         "PREFIX=/usr",

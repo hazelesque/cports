@@ -1,10 +1,7 @@
 pkgname = "xdg-desktop-portal-wlr"
-pkgver = "0.8.1"
+pkgver = "0.8.4"
 pkgrel = 0
 build_style = "meson"
-configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
-]
 hostmakedepends = [
     "meson",
     "ninja",
@@ -25,8 +22,9 @@ pkgdesc = "XDG-desktop-portal implementation for wlroots"
 license = "MIT"
 url = "https://github.com/emersion/xdg-desktop-portal-wlr"
 source = f"https://github.com/emersion/xdg-desktop-portal-wlr/releases/download/v{pkgver}/xdg-desktop-portal-wlr-{pkgver}.tar.gz"
-sha256 = "24d365bbac02f5ae3300024d84928484852d962712b6acc1f1ed7d92f2f59b2f"
+sha256 = "41b9683acae9415005d7b62d801e34946cb95da5eaaa83528c7085759a635187"
 hardening = ["vis", "!cfi"]
+options = ["etcfiles"]
 
 
 def post_install(self):

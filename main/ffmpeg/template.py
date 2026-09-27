@@ -1,6 +1,6 @@
 pkgname = "ffmpeg"
-pkgver = "8.1.1"
-pkgrel = 0
+pkgver = "8.1.3"
+pkgrel = 1
 build_style = "configure"
 configure_args = [
     "--prefix=/usr",
@@ -142,17 +142,20 @@ pkgdesc = "Decoding, encoding and streaming software"
 license = "GPL-3.0-or-later"
 url = "https://ffmpeg.org"
 source = f"{url}/releases/ffmpeg-{pkgver}.tar.xz"
-sha256 = "b6863adde98898f42602017462871b5f6333e65aec803fdd7a6308639c52edf3"
+sha256 = "7138d28c96d9d3e3af4ee3d8cad72741f8ffb40da90c1112235dea3ecd3178a3"
 # some conf checks like for some pthread functions don't detect interfaces
 # without it
-tool_flags = {"CFLAGS": ["-D_GNU_SOURCE"]}
+tool_flags = {
+    "CFLAGS": ["-D_GNU_SOURCE"],
+    "LDFLAGS": ["-Wl,-z,stack-size=0x200000"],
+}
 # seems to need rpath?
 options = ["!check"]
 
 if self.has_lto(force=True):
     configure_args += ["--enable-lto=thin"]
 
-if self.profile().cross:
+if self.profile.cross:
     _archmap = {
         "aarch64": "aarch64",
         "loongarch64": "loongarch",
@@ -162,14 +165,14 @@ if self.profile().cross:
         "riscv64": "riscv",
         "x86_64": "x86_64",
     }
-    if self.profile().arch not in _archmap:
-        broken = f"unknown architecture: {self.profile().arch}"
+    if self.profile.arch not in _archmap:
+        broken = f"unknown architecture: {self.profile.arch}"
 
     configure_args += [
         "--enable-cross-compile",
         "--target-os=linux",
-        "--arch=" + _archmap.get(self.profile().arch, "unknown"),
-        f"--sysroot={self.profile().sysroot}",
+        "--arch=" + _archmap.get(self.profile.arch, "unknown"),
+        f"--sysroot={self.profile.sysroot}",
     ]
 
 

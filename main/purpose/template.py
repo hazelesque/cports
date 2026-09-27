@@ -1,5 +1,5 @@
 pkgname = "purpose"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 # menutest: ??
@@ -32,9 +32,9 @@ depends = ["accounts-qml-module"]
 checkdepends = ["xwayland-run", *depends]
 pkgdesc = "KDE purpose-specific integrations"
 license = "LGPL-2.1-only"
-url = "https://api.kde.org/frameworks/purpose/html/index.html"
+url = "https://community.kde.org/Frameworks/index.html"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/purpose-{pkgver}.tar.xz"
-sha256 = "cc7b7599d1ac7ce7ed07351a35d742fac1b7e554b208a7b1c92e859b3b4add30"
+sha256 = "4fda64d235927e3cc230416d5c9304f5d3e040dc2553b77b2c69bf54c6f04862"
 hardening = ["vis"]
 
 

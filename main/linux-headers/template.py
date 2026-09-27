@@ -1,16 +1,16 @@
 pkgname = "linux-headers"
-pkgver = "6.18.7"
+pkgver = "7.0.12"
 pkgrel = 0
 hostmakedepends = ["perl"]
 pkgdesc = "Linux API headers for userland development"
 license = "GPL-2.0-only"
 url = "https://www.kernel.org"
 source = f"$(KERNEL_SITE)/kernel/v{pkgver[0]}.x/linux-{pkgver}.tar.xz"
-sha256 = "b726a4d15cf9ae06219b56d87820776e34d89fbc137e55fb54a9b9c3015b8f1e"
+sha256 = "57edc9a41efc1ca6b797afa8f4a587a30da2af6bca7356eb56e1e1a4ada265da"
 # nothing to test
 options = ["!check"]
 
-match self.profile().arch:
+match self.profile.arch:
     case "x86_64":
         _arch = "x86_64"
     case "aarch64":
@@ -24,7 +24,7 @@ match self.profile().arch:
     case "loongarch64" | "loongarch64":
         _arch = "loongarch"
     case _:
-        broken = f"Unknown CPU architecture: {self.profile().arch}"
+        broken = f"Unknown CPU architecture: {self.profile.arch}"
 
 
 def build(self):

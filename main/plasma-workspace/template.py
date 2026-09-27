@@ -1,5 +1,5 @@
 pkgname = "plasma-workspace"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 # TODO: -DINSTALL_SDDM_WAYLAND_SESSION=ON experiments?
@@ -133,10 +133,11 @@ checkdepends = [
 replaces = ["xdg-desktop-portal-kde<6.2.1", "plasma-desktop<6.4.0"]
 pkgdesc = "KDE Plasma Workspace"
 license = "MIT AND GPL-3.0-only AND LGPL-3.0-only"
-url = "https://api.kde.org/plasma/plasma-workspace/html"
+url = "https://kde.org/plasma-desktop"
 source = f"$(KDE_SITE)/plasma/{'.'.join(pkgver.split('.')[0:3])}/plasma-workspace-{pkgver}.tar.xz"
-sha256 = "64d753cadcb9cde6ac09eeedf6b02ec5ccdfbd01722c5e9f2533fd0993b0d854"
+sha256 = "94ab21e2243b7876f65c315f1e545081c6437f5bd0a041ca4fb6c2533ae874c9"
 hardening = ["vis"]
+options = ["etcfiles"]
 
 
 def post_install(self):

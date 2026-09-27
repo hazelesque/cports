@@ -1,9 +1,8 @@
 pkgname = "localsearch"
 pkgver = "3.11.1"
-pkgrel = 0
+pkgrel = 1
 build_style = "meson"
 configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
     # TODO: user services with dinit?
     "-Ddefault_library=shared",
     "-Dextract=true",
@@ -71,4 +70,4 @@ source = f"$(GNOME_SITE)/localsearch/{pkgver[:-2]}/localsearch-{pkgver}.tar.xz"
 sha256 = "7b39a6c28a8acf2b172f15b2fb5ee7c7a3764c447c2f4a14caa239b7ebe61942"
 tool_flags = {"LDFLAGS": ["-Wl,-z,stack-size=0x200000"]}
 # check relies on stuff unsupported in chroot
-options = ["!check", "!cross"]
+options = ["etcfiles", "!check", "!cross"]

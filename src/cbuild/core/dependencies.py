@@ -41,7 +41,7 @@ def _srcpkg_ver(pkgn, pkgb):
 
     tmplv = template.Template(
         pkgp,
-        pkgb.profile().arch,
+        pkgb.profile.arch,
         True,
         False,
         (1, 1),
@@ -131,7 +131,7 @@ def setup_depends(pkg, only_names=False):
             rdeps.append((orig, dep))
 
     cdeps = []
-    if not pkg.profile().cross and (pkg.options["check"] or pkg._force_check):
+    if not pkg.profile.cross and (pkg.options["check"] or pkg._force_check):
         cdeps = pkg.checkdepends
 
     if pkg.stage > 0 and not only_names:
@@ -170,19 +170,20 @@ def _install_from_repo(pkg, pkglist, cross=False):
             capture_output=True,
             allow_untrusted=not signkey,
         )
-    elif cross and pkg.profile().cross:
-        ret = apki.call_chroot(
+    elif cross and pkg.profile.cross:
+        ret = apki.call(
             "add",
             [
                 "--root",
-                str(pkg.profile().sysroot),
+                str(pkg.profile.sysroot),
                 "--no-scripts",
                 *pkglist,
             ],
             pkg,
             capture_output=True,
-            arch=pkg.profile().arch,
+            arch=pkg.profile.arch,
             allow_untrusted=not signkey,
+            chroot=True,
         )
     else:
         # write world file and fix instead of adding to account for previous
@@ -193,12 +194,13 @@ def _install_from_repo(pkg, pkglist, cross=False):
             for pkgn in pkglist:
                 wf.write(f"{pkgn}\n")
         # and then perform the transaction
-        ret = apki.call_chroot(
+        ret = apki.call(
             "fix",
             [],
             pkg,
             capture_output=True,
             allow_untrusted=not signkey,
+            chroot=True,
         )
     if ret.returncode != 0:
         outl = ret.stderr.strip().decode()
@@ -219,22 +221,25 @@ def _get_vers(pkgs, pkg, sysp, arch):
 
     ret = {}
     with flock.lock(flock.apklock(arch if arch else chroot.host_cpu())):
-        out, crepos = apki.call(
-            "search",
-            ["--from", "none", "-e", "-a", *plist],
+        vers, crepos = apki.query(
+            ["name", "version"],
+            [
+                "--from",
+                "none",
+                "--all-matches",
+                *plist,
+            ],
             pkg,
             root=sysp,
-            capture_output=True,
             arch=arch,
             allow_untrusted=True,
             return_repos=True,
         )
-    if out.returncode >= len(plist):
+    if not vers:
         return {}, None
 
-    # map the output to a dict
-    for f in out.stdout.strip().decode().split("\n"):
-        nn, nv = autil.get_namever(f)
+    for ver in vers:
+        nn, nv = ver["name"], ver["version"]
         if nn not in ret:
             ret[nn] = [nv]
         else:
@@ -245,59 +250,62 @@ def _get_vers(pkgs, pkg, sysp, arch):
 
 def _is_available(pkgn, pkgop, pkgv, pkg, vers, crepos, sysp, arch):
     if pkgn not in vers:
-        return None
+        return None, None, None
 
     pvers = vers[pkgn]
 
     # we don't care about ver so take latest (it's what apk would install)
     if not pkgv:
-        return pvers[-1]
+        return pvers[-1], None, None
 
     ppat = pkgn + pkgop + pkgv
 
     # first match against every version available
     for apn in reversed(pvers):
         # matched at least one version
-        if autil.pkg_match(f"{pkgn}-{apn}", ppat):
+        if autil.pkg_match(pkgn, apn, ppat):
             break
     else:
         # matched no version, so build
-        return None
+        return None, False, None
 
     # only one version, so it's unambiguous
     if len(pvers) == 1:
-        return pvers[0]
+        return pvers[0], None, None
 
     # now check repos individually in priority order
+    # TODO: this could be refactored into a single query call by checking
+    # the repositories field, which would be a little faster, but not much
     with flock.lock(flock.apklock(arch)):
         for cr in crepos:
             if cr == "--repository":
                 continue
-            st = (
-                apki.call(
-                    "search",
-                    ["--from", "none", "--repository", cr, "-e", "-a", pkgn],
-                    None,
-                    root=sysp,
-                    capture_output=True,
-                    arch=arch,
-                    allow_untrusted=True,
-                )
-                .stdout.strip()
-                .decode()
+            jsn = apki.query(
+                ["name", "version"],
+                [
+                    "--from",
+                    "none",
+                    "--repository",
+                    cr,
+                    "--all-matches",
+                    pkgn,
+                ],
+                None,
+                root=sysp,
+                arch=arch,
+                allow_untrusted=True,
             )
-            if len(st) == 0:
+            if not jsn:
                 continue
-            pn = st.split("\n")
             # highest priority repo takes all
-            if len(pn) > 0:
-                if autil.pkg_match(pn[0], ppat):
-                    nn, nv = autil.get_namever(pn[0])
-                    return nv
-                return None
+            if len(jsn) > 0:
+                nn, nv = jsn[0]["name"], jsn[0]["version"]
+                if autil.pkg_match(nn, nv, ppat):
+                    return nv, None, None
+                return None, nv, cr
 
     # no match in individual repos? this should be unreachable
-    return None
+    return None, None, None
 
 
 def install(pkg, origpkg, step, depmap, hostdep, update_check):
@@ -305,7 +313,7 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
     if pkg.build_style:
         style = f" [{pkg.build_style}]"
 
-    pprof = pkg.profile()
+    pprof = pkg.profile
     tarch = pprof.arch
     cross = not not pprof.cross
 
@@ -363,7 +371,9 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
             host_binpkg_deps.append(pkgn)
             continue
         # check if available in repository
-        aver = _is_available(pkgn, "=", sver, pkg, hvers, hrepos, hsys, None)
+        aver, avail, arepo = _is_available(
+            pkgn, "=", sver, pkg, hvers, hrepos, hsys, None
+        )
         if aver:
             log.out_plain(f"  [host] {pkgn}: found ({aver})")
             host_binpkg_deps.append(f"{pkgn}={aver}")
@@ -373,7 +383,16 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
             log.out_plain(f"  [host] {pkgn}: unresolved build dependency")
             pkg.error(f"host dependency '{pkgn}' does not exist")
         # not found
-        log.out_plain(f"  [host] {pkgn}: not found")
+        if avail is False:
+            log.out_plain(
+                f"  \f[bold,orange][host] {pkgn}: available version(s) not matching template\f[]"
+            )
+        elif avail:
+            log.out_plain(
+                f"  \f[bold,red][host] {pkgn}: mismatched version ({avail}) in repo '{arepo}'\f[]"
+            )
+        else:
+            log.out_plain(f"  \f[bold][host] {pkgn}: not found\f[]")
         # check for loops
         if not cross and (pkgn == origpkg or pkgn == pkg.pkgname):
             pkg.error(f"[host] build loop detected: {pkgn} <-> {origpkg}")
@@ -386,7 +405,9 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
             binpkg_deps.append(pkgn)
             continue
         # check if available in repository
-        aver = _is_available(pkgn, "=", sver, pkg, tvers, trepos, tsys, tarch)
+        aver, avail, arepo = _is_available(
+            pkgn, "=", sver, pkg, tvers, trepos, tsys, tarch
+        )
         if aver:
             log.out_plain(f"  [target] {pkgn}: found ({aver})")
             binpkg_deps.append(f"{pkgn}={aver}")
@@ -396,7 +417,16 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
             log.out_plain(f"  [target] {pkgn}: unresolved build dependency")
             pkg.error(f"target dependency '{pkgn}' does not exist")
         # not found
-        log.out_plain(f"  [target] {pkgn}: not found")
+        if avail is False:
+            log.out_plain(
+                f"  \f[bold,orange][target] {pkgn}: available version(s) not matching template\f[]"
+            )
+        elif avail:
+            log.out_plain(
+                f"  \f[bold,red][target] {pkgn}: mismatched version ({avail}) in repo '{arepo}'\f[]"
+            )
+        else:
+            log.out_plain(f"  \f[bold][target] {pkgn}: not found\f[]")
         # check for loops
         if pkgn == origpkg or pkgn == pkg.pkgname:
             pkg.error(f"[target] build loop detected: {pkgn} <-> {origpkg}")
@@ -433,22 +463,34 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
         if pkgn == origpkg and pkg.pkgname != origpkg:
             pkg.error(f"[runtime] build loop detected: {pkgn} <-> {pkgn}")
         # check the repository
-        aver = _is_available(pkgn, pkgop, pkgv, pkg, rvers, rrepos, tsys, tarch)
+        aver, avail, arepo = _is_available(
+            pkgn, pkgop, pkgv, pkg, rvers, rrepos, tsys, tarch
+        )
         if aver:
             log.out_plain(f"  [runtime] {dep}: found ({aver})")
             continue
         # not found
-        log.out_plain(f"  [runtime] {dep}: not found")
+        if avail is False:
+            log.out_plain(
+                f"  \f[bold,orange][runtime] {dep}: available version(s) not matching template\f[]"
+            )
+        elif avail:
+            log.out_plain(
+                f"  \f[bold,red][runtime] {dep}: mismatched version ({avail}) in repo '{arepo}'\f[]"
+            )
+        else:
+            log.out_plain(f"  \f[bold][runtime] {dep}: not found\f[]")
         # consider missing
         rdv, fulln = _srcpkg_ver(pkgn, pkg)
         if not fulln or (pkgop and pkgv and not rdv):
             pkg.error(f"template '{pkgn}' cannot be resolved")
         if pkgop and pkgv:
-            rfv = f"{pkgn}-{rdv}"
             rpt = pkgn + pkgop + pkgv
             # ensure the build is not futile
-            if not autil.pkg_match(rfv, rpt):
-                pkg.error(f"version {rfv} does not match dependency {rpt}")
+            if not autil.pkg_match(pkgn, rdv, rpt):
+                pkg.error(
+                    f"version {pkgn}={rdv} does not match dependency {rpt}"
+                )
         # treat the same as any missing target dependency, but without install
         missing_deps.append(fulln)
 
@@ -473,6 +515,7 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
                     force_check=pkg._force_check,
                     stage=pkg.stage,
                     allow_restricted=pkg._allow_restricted,
+                    allow_ci=pkg._allow_ci,
                     data=pkg._data,
                     linter=pkg._linter,
                     formatter=pkg._formatter,
@@ -503,6 +546,7 @@ def install(pkg, origpkg, step, depmap, hostdep, update_check):
                     force_check=pkg._force_check,
                     stage=pkg.stage,
                     allow_restricted=pkg._allow_restricted,
+                    allow_ci=pkg._allow_ci,
                     data=pkg._data,
                 ),
                 depmap,

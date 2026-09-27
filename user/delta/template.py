@@ -1,6 +1,6 @@
 pkgname = "delta"
-pkgver = "0.18.2"
-pkgrel = 2
+pkgver = "0.19.2"
+pkgrel = 0
 build_style = "cargo"
 prepare_after_patch = True
 hostmakedepends = ["cargo-auditable", "pkgconf"]
@@ -14,16 +14,18 @@ pkgdesc = "Syntax-highlighting pager for git, diff, and grep output"
 license = "MIT"
 url = "https://github.com/dandavison/delta"
 source = f"{url}/archive/refs/tags/{pkgver}.tar.gz"
-sha256 = "64717c3b3335b44a252b8e99713e080cbf7944308b96252bc175317b10004f02"
+sha256 = "f59b86f8c8dda4d76a3ba34b8553777a20c3b461646917d8e480fac6531bba9f"
 # generates completions with host binary
 options = ["!cross"]
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "zsh"]:
         with open(self.cwd / f"delta.{shell}", "w") as outf:
             self.do(
-                f"target/{self.profile().triplet}/release/delta",
+                cargo.target_path(self, "delta"),
                 "--generate-completion",
                 shell,
                 stdout=outf,
@@ -31,7 +33,9 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/delta")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "delta"))
     self.install_license("LICENSE")
     for shell in ["bash", "fish", "zsh"]:
         self.install_completion(f"delta.{shell}", shell)

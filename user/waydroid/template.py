@@ -21,17 +21,21 @@ url = "https://github.com/waydroid/waydroid"
 source = f"{url}/archive/refs/tags/{pkgver}.tar.gz"
 sha256 = "4b963aceb9de2884020e98b26e40147b3f26a0444606633adc45b63752f57dca"
 # check: no tests
-options = ["!check"]
+options = ["etcfiles", "!check"]
 
 
 def post_install(self):
     from cbuild.util import python
 
     python.precompile(self, "usr/lib")
-    self.install_service("^/waydroid-container")
+    self.install_service(self.files_path / "waydroid-container")
     self.install_file(
-        "^/51_waydroid.nft", "etc/nftables.d", name="51_waydroid.nft"
+        self.files_path / "51_waydroid.nft",
+        "etc/nftables.d",
+        name="51_waydroid.nft",
     )
     self.install_file(
-        "^/modules-load.conf", "usr/lib/modules-load.d", name="waydroid.conf"
+        self.files_path / "modules-load.conf",
+        "usr/lib/modules-load.d",
+        name="waydroid.conf",
     )

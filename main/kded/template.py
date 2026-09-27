@@ -1,5 +1,5 @@
 pkgname = "kded"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -18,11 +18,11 @@ makedepends = [
 ]
 pkgdesc = "Extensible central daemon of KDE workspaces"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later"
-url = "https://api.kde.org/frameworks/kded/html"
+url = "https://community.kde.org/Frameworks"
 source = (
     f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kded-{pkgver}.tar.xz"
 )
-sha256 = "4265d1162cbd7febf16d103bf1bd9fab858fa3f54f52797ed0938436bee347af"
+sha256 = "0adf6e22300cee74d57e790b5db844f03a1366a4d6315edbaa49174b12bf1861"
 hardening = ["vis"]
 
 

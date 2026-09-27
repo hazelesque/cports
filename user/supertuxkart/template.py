@@ -1,6 +1,6 @@
 pkgname = "supertuxkart"
 pkgver = "1.5"
-pkgrel = 1
+pkgrel = 2
 build_style = "cmake"
 hostmakedepends = ["cmake", "ninja", "pkgconf"]
 makedepends = [
@@ -30,7 +30,7 @@ tool_flags = {"LDFLAGS": []}
 # breaks bullet
 hardening = ["!int"]
 
-if self.profile().arch in ["loongarch64"]:
+if self.profile.arch in ["loongarch64"]:
     # loongarch64-chimera-linux-musl-ld: error: address assignment did not converge
     tool_flags["LDFLAGS"] += ["-mno-relax"]
 

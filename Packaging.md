@@ -164,14 +164,14 @@ Current architectures with best support:
 Other architectures with repositories:
 
 * `loongarch64` (generic, no LTO + unit tests enforced)
-* `ppc64` (ppc970+, unit tests only run for reference)
-* `ppc` (PowerPC 603+, unit tests only run for reference)
 * `riscv64` (rv64gc, no LTO + unit tests not run)
 
 Other possible targets:
 
 * `armhf` (ARMv6 + VFP)
 * `armv7` (ARMv7 + VFP)
+* `ppc64` (ppc970+)
+* `ppc` (PowerPC 603+)
 
 <a id="quality_requirements"></a>
 ## Quality Requirements
@@ -274,62 +274,40 @@ files are considered ephemeral. In practice this means:
    `/var` directory is forbidden in packages. This results in a system where
    deletion of these dirs/files will result in them being re-created from
    scratch upon next boot.
+3) Note that directories in `/run` should not be handled through the
+   `tmpfiles.d` mechanism, as the lifetime of those is limited to the
+   runtime of the service. The mechanism of creation depends on how the
+   service performs its privilege separation; if done through `dinit` then
+   a separate service (with `depends-ms` linkage) should perform the creation
+   (e.g. `command = /usr/bin/install -d -m 0750 /run/foo`), else a wrapper
+   script for the service can do so (or the service can do so internally
+   before losing privileges).
 
 <a id="handling_etc"></a>
 #### Handling /etc
 
-Frequently, properly dealing with `/etc` paths in packages can become
-non-trivial. Currently there is a lot of templates that do not follow
-the expected style, typically due to little support from the upstream
-software.
+Chimera has an eventual goal of making `/etc` a stateless directory
+that can be safely repopulated from immutable data.
 
-The expectation in Chimera packages is that software does not install
-default configuration files in `/etc`, this being the user's responsibility.
-If possible however, software should still work by default.
+Therefore, it is preferred if software does not install configuration
+in `/etc`. This requires cooperation from the software. If the software
+permits, we prefer the style of configuration that has immutable defaults
+somewhere with user-created overrides in `/etc`. However, a lot of software
+does not work this way, and patching everything becomes unsustainable.
 
-There are multiple types of configuration handling that can affect the
-way things can be packaged:
+It is preferred that templates do not install sample configurations in
+`/etc`. The location `/usr/share/examples/packagename` is more suitable
+for that. It is okay to install files there if that is the sole location
+the software reads and these installed files are reasonable out of the
+box defaults without which the software wouldn't function properly.
 
-1) Software does not expect a configuration file to be in place by default,
-   having builtin default settings. The user can create a configuration file
-   in `/etc/somewhere` to alter the settings. Optionally, if upstream provides
-   one, the package may install a sample in `/usr/share/etc/somewhere`.
-2) Software expects a configuration file, but will not work or is not expected
-   to work when used with a sample and requires user-supplied settings.
-   In this case, it can be handled the same as case 1.
-3) Software expects a configuration file in `/etc` and will not work without
-   one, but a default sample is typically good enough to run a service, and
-   does not expect it to be altered. In this case, the default configuration
-   should be installed in `/usr/share/etc/somewhere` and the software should
-   be made to use it preferentially when the `/etc` one does not exist already.
-   For instance, if the software takes a command line argument or an environment
-   variable to provide a config file path, a small wrapper script can be written
-   for the purpose of a `dinit` service that checks for existence of the user
-   file in `/etc` and if it does not exist, passes the argument or so on to
-   make it use the systemwide default.
-4) A case like the above, but with no way to externally handle this. In this
-   case, patching the software downstream and/or convincing upstream to fix
-   this properly should be considered. This is the worst case scenario. If
-   everything else fails, it can be treated like case 2, and require user
-   intervention before using it (with `/usr/share/etc` having a canonical
-   tree).
-5) Software that already does the right thing. A particular desired pattern
-   is with `.d` directories that preferentially scan `/etc/foo.d` and then
-   `/usr/lib/foo.d` or similar. Nothing to do here except making sure that
-   packaging installs in the correct `/usr` paths.
+All packages that legitimately contain `/etc` files must be marked with
+the `etcfiles` template option. This is for the purpose of tracking things
+and making packagers verify that these files are indeed necesary.
 
-There are some things not to do:
-
-1) Install in random `/usr` paths. Things that require a systemwide config
-   to be installed should mirror a proper `/etc` tree in `/usr/share/etc`,
-   unless they already have their own builtin path that is expected by upstream.
-2) Use `tmpfiles.d` to alter paths in `/usr`. This path is immutable, and should
-   contain only world-readable, root-owned files.
-3) Use `tmpfiles.d` to copy to `/etc` using the `C` command. This may seem like
-   a good idea for the purpose of populating the path but has the major drawback
-   of not tracking packaging changes; once copied once, it will not get updated,
-   even if the package updates its files and the user has not altered the copy
-   at all.
+The eventual plan is to have `cbuild` automatically handle `/etc` paths
+in a way to permit stateless installations, without any explicit action
+taken by the template.
 
 <a id="template_hardening"></a>
 #### Hardening Templates
@@ -494,7 +472,7 @@ on the `x86_64` architecture):
 Note the `ud1l` instruction, specifically the `0xc(%eax)`. The `0xc` encodes
 the identifier of the sanitizer check. The full list is available here:
 
-https://github.com/llvm/llvm-project/blob/main/clang/lib/CodeGen/CodeGenFunction.h#L112
+https://github.com/llvm/llvm-project/blob/llvmorg-22.1.8/clang/lib/CodeGen/SanitizerHandler.h
 
 At the time of writing, these were:
 
@@ -1085,7 +1063,8 @@ Keep in mind that default values may be overridden by build styles.
   `wrksrc` that the source's extracted result will have. Specifying an empty
   string or `.` implies default behavior. Effectively all sources that have
   a path that is not the default will be extracted separately and then moved
-  into place.
+  into place. Source paths starting with `+` will replace any previous path
+  already there.
 * `subdesc` *(str)* The package sub-description which will be appended to
   the main description as ` (subdesc)`.
 * `tools` *(dict)* This can be used to override default tools. Refer to the
@@ -1865,6 +1844,10 @@ the template including for subpackages:
   disable linker and LTO threads.
 * `linkundefver` *(false)* Pass `--undefined-version` to `ld.lld` to
   bypass version errors in affected packages.
+* `linkrelax` *(true)* If disabled, disables linker relaxation for
+  `ld.lld`. If possible, use `LDFLAGS` for this, this is a big hammer
+  mostly for e.g. Rust things on specific platforms where there is no
+  way to pass the flags correctly.
 * `framepointer` *(true)* If enabled, frame pointers will be turned
   on to make profiling of resultant binaries easier.
 * `fullrustflags` *(false)* If enabled, RUSTFLAGS will also contain
@@ -1906,6 +1889,8 @@ for subpackages separately if needed:
   pattern list to restrict the set.
 * `hardlinks` *(false)* Normally, multiple hardlinks are detected and errored
   on. By enabling this, you allow packages with hardlinks to build.
+* `etcfiles` *(false)* Normally, packages are not allowed to contain files
+  in `/etc` path unless marked with this option.
 * `lintcomp` *(true)* If enabled, shell completion commands get checked to see
   if they resolve to a matching command.
 * `lintstatic` *(true)* Normally, static libraries are not allowed to be in
@@ -2150,7 +2135,7 @@ More about that in the respective API sections, but the API allows
 one to retrieve compiler flags in proper architecture-specific way,
 check if we are cross-compiling and otherwise inspect the target.
 
-API-side, the profile (retrieved with `self.profile()` for example)
+API-side, the profile (retrieved with `self.profile` for example)
 is represented as a `Profile` object. It looks like this:
 
 ```
@@ -2542,9 +2527,7 @@ Shared API for both templates and subpackages.
 All APIs may raise errors. The user is not supposed to handle the errors,
 they will be handled appropriately by `cbuild`.
 
-Filesystem APIs take strings or `pathlib` paths. They also allow the special
-prefix `>/` in the path as a shorthand for `self.destdir`, and the special
-prefix `^/` that is a shorthand for `self.files_path`.
+Filesystem APIs take strings or `pathlib` paths.
 
 ##### self.pkgname
 
@@ -3009,11 +2992,10 @@ with self.stamp("test") as s:
 The `check()` method ensures that the code following it is not run if the
 stamp file already exists. The script will proceed after the context.
 
-##### def profile(self, target = None)
+##### def get_profile(self, target = None)
 
-If `target` is not given, returns the current profile, otherwise only
-to be used as a context manager. Temporarily overrides the current build
-profile to the given `target`, which can be a specific profile name (for
+If `target` is not given, returns the current profile, else returns the
+profile defined by `target`, which can be a specific profile name (for
 example `aarch64`) or the special aliases `host` and `target`, which refer
 to the build machine and the target machine respectively (the target machine
 is the same as build machine when not cross compiling).
@@ -3022,21 +3004,35 @@ It is also possible to specify `target:native` as well as e.g. `aarch64:native`
 to force a non-cross profile in an environment where target would otherwise
 be cross. This is useful for particular cases of compiler flags and so on.
 
+##### @property def profile(self)
+
+Equivalent to `self.get_profile()` but as a property accessor for more
+convenient syntax.
+
+Used like:
+
+```
+if self.profile.endian == "big":
+    ...
+```
+
+##### @contextmanager def use_profile(self, target)
+
+Temporarily overrides the current build profile to the given `target`, which
+can be any name that can be passed to `self.get_profile(target)`.
+
 Usage:
 
 ```
-with self.profile("aarch64") as pf:
+with self.use_profile("aarch64") as pf:
     ... do something that we need for aarch64 at the time ...
-
-if self.profile().endian == "big":
-    ...
 ```
 
 ##### def get_tool_flags(self, name, extra_flags = [], hardening = [], shell = False, target = None)
 
 Get specific tool flags (e.g. `CFLAGS`) for the current profile or for `target`.
 
-The `target` argument is the same as for `profile()`.
+The `target` argument is the same as for `get_profile()`.
 
 See the section on tools and tool flags for more information.
 
@@ -3063,7 +3059,7 @@ A shortcut for `get_tool_flags` with `LDFLAGS`.
 
 Get the specific tool (e.g. `CC`) for the current profile or for `target`.
 
-The `target` argument is the same as for `profile()`.
+The `target` argument is the same as for `get_profile()`.
 
 This properly deals with cross-compiling, taking care of adding the right
 prefix where needed and so on. It should always be used instead of querying
@@ -3076,7 +3072,7 @@ as well as the current profile or the `target`) has the given hardening
 flag enabled. For a hardening flag to be enabled, it must not be disabled
 by the template or defaults, and it must be supported for the target.
 
-The `target` argument is the same as for `profile()`.
+The `target` argument is the same as for `get_profile()`.
 
 ##### def has_lto(self, target = None, force = False)
 
@@ -3422,6 +3418,15 @@ Clears the file checksums in `.cargo-checksum.json` of a vendored crate.
 You will need to do this for every crate you patch, as Cargo verifies the
 checksums of every file specified in there. Clearing effectively allows
 easy distro patching.
+
+##### def target_path(pkg, name, base_path = "target", profile = "release")
+
+Returns a path to a file within Cargo build tree. To be used to simplify
+file access. The result is a string with the format:
+
+```
+base_path/pkg.profile.triplet/profile/name
+```
 
 #### cbuild.util.cmake
 
@@ -3814,7 +3819,19 @@ The allowed variables are:
   the `url` of the template (taken as is) plus the `source` URL(s) (with
   the filename component stripped) are used. An exception to this is when
   the `source` URLs contain `ftp.gnome.org`, in which case the `url` of
-  the template is not used and only `source` URLs are.
+  the template is not used and only `source` URLs are. When not set,
+  automatic detection for various URL types takes place, particularly
+  Git forges, which then automatically take on the `git_forge` pattern
+  style (below).
+* `pattern_style` *(str)* A predefined style for a pattern and URL to
+  be used instead of explicit `pattern`. Currently allowed value is
+  `git_forge`, which represents a common style and pattern for Git hosting
+  software based on the `/info/refs` endpoint. With this style, automatic
+  URLs are stripped down to their initial components in the format of
+  `https://tld/user/repo`, while explicitly given URLs are preserved,
+  and they have `/info/refs?service=git-upload-pack` added to them.
+  A pattern is then set to match tags from the file. No other pattern
+  styles currently exist.
 * `pattern` *(str)* A Python regular expression (it is considered a verbose
   regular expression, so you can use multiple lines and comments) that
   matches the version number in the fetched page. You should match the
@@ -3845,6 +3862,8 @@ The allowed variables are:
 * `vdsuffix` *(str)* A Python regular expression matching the part that
   follows the numeric part of the version directory in the URL. Used when
   `single_directory` is disabled. The default is `|\.x`.
+* `agent_name` *(str)* The pre-slash part of the user agent. Usually not
+  necessary but sometimes we can't do update checking otherwise.
 
 You can define some functions:
 

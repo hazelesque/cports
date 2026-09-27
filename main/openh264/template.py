@@ -4,7 +4,7 @@ pkgver = "2.6.0"
 pkgrel = 1
 build_style = "makefile"
 make_build_args = [
-    f"ARCH={self.profile().arch}",
+    f"ARCH={self.profile.arch}",
     "BUILDTYPE=Release",
     "CFLAGS_OPT=",
     "ENABLEPIC=Yes",
@@ -30,7 +30,7 @@ sha256 = [
 ]
 
 
-match self.profile().arch:
+match self.profile.arch:
     case "aarch64" | "armv7" | "x86*":
         make_build_args += ["USE_ASM=Yes"]
     case _:
@@ -75,7 +75,7 @@ def _(self):
     self.subdesc = "Plugin for Firefox"
     # installed in special path; the libgmpopenh264.so also has a soname of
     # libopenh264. just exclude it from providing stuff..
-    self.options = ["!scanshlibs"]
+    self.options = ["!scanshlibs", "etcfiles"]
     self.install_if = [self.with_pkgver("openh264-firefox-plugin-meta")]
     return [
         "etc/profile.d",

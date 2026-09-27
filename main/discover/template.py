@@ -1,5 +1,5 @@
 pkgname = "discover"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 # fails in chroot env, needs some testdata
@@ -58,8 +58,9 @@ pkgdesc = "KDE application manager"
 license = "(GPL-2.0-only OR GPL-3.0-only) AND (LGPL-2.1-only OR LGPL-3.0-only)"
 url = "https://userbase.kde.org/Discover"
 source = f"$(KDE_SITE)/plasma/{pkgver}/discover-{pkgver}.tar.xz"
-sha256 = "0d1471adf4b0b3bf92ac93225e2e4860493677f3fb9a02dbf44b193ae7c15357"
+sha256 = "e9830fffebc54c781dcb076db4ab9462ee27ddd7fd3769403a211743636e1f67"
+options = ["etcfiles"]
 
 
-if self.profile().arch in ["aarch64", "ppc64le", "x86_64"]:
+if self.profile.arch in ["aarch64", "ppc64le", "x86_64"]:
     makedepends += ["qt6-qtwebview-devel"]

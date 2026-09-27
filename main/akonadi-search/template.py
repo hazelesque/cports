@@ -1,5 +1,5 @@
 pkgname = "akonadi-search"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 # sqlite: fails instantly (?)
@@ -36,11 +36,11 @@ makedepends = [
 checkdepends = ["xwayland-run"]
 pkgdesc = "KDE Akonadi search libraries"
 license = "LGPL-2.1-only AND (GPL-2.0-only OR GPL-3.0-only)"
-url = "https://api.kde.org/kdepim/akonadi-search/html"
+url = "https://community.kde.org/KDE_PIM"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/akonadi-search-{pkgver}.tar.xz"
 )
-sha256 = "2a3a40284faeb61c2d2f1b09ecc80c1844e498115ad8bccc1729431141b95e3f"
+sha256 = "6bce5595f5f1f0d49eaa777d86c4c74c83086e93f17f18a93c51c24738a297a2"
 
 
 def prepare(self):

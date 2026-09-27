@@ -16,15 +16,17 @@ sha256 = "b65c1b432a9903f554516445588cbab796865a7058380fd7856835b081e0ec0e"
 # generates completions with host bins
 options = ["!cross"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "needs atomic64"
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "zsh"]:
         with open(self.cwd / f"rustic.{shell}", "w") as outf:
             self.do(
-                f"target/{self.profile().triplet}/release/rustic",
+                cargo.target_path(self, "rustic"),
                 "completions",
                 shell,
                 stdout=outf,

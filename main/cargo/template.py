@@ -1,5 +1,5 @@
 pkgname = "cargo"
-pkgver = "1.95.0"
+pkgver = "1.98.0"
 pkgrel = 0
 build_wrksrc = "src/tools/cargo"
 build_style = "cargo"
@@ -18,7 +18,7 @@ pkgdesc = "Rust package manager"
 license = "MIT OR Apache-2.0"
 url = "https://rust-lang.org"
 source = f"https://static.rust-lang.org/dist/rustc-{pkgver}-src.tar.xz"
-sha256 = "62b67230754da642a264ca0cb9fc08820c54e2ed7b3baba0289876d4cdb48c08"
+sha256 = "271fa73d8174f53d713c46a8310da7bf7cfdcfb8b7cfd1c2b74b84a83ae9fb1e"
 # global environment
 env = {
     "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt",
@@ -48,7 +48,7 @@ def init_prepare(self):
         self.make_env["LIBGIT2_NO_VENDOR"] = "0"
         self.make_env["OPENSSL_STATIC"] = "1"
         self.make_env["OPENSSL_NO_PKG_CONFIG"] = "1"
-        self.make_env["OPENSSL_DIR"] = str(self.profile().sysroot / "usr")
+        self.make_env["OPENSSL_DIR"] = str(self.profile.sysroot / "usr")
 
 
 def prepare(self):
@@ -58,8 +58,10 @@ def prepare(self):
 
 @custom_target("bootstrap", "build")
 def _(self):
-    binp = f"target/{self.profile().triplet}/release/cargo"
-    bdirn = f"cargo-{pkgver}-{self.profile().triplet}"
+    from cbuild.util import cargo
+
+    binp = cargo.target_path(self, "cargo")
+    bdirn = f"cargo-{pkgver}-{self.profile.triplet}"
     self.mkdir(bdirn)
     self.cp(binp, bdirn)
     self.cp("LICENSE-APACHE", bdirn)
@@ -70,7 +72,9 @@ def _(self):
 
 
 def install(self):
-    binp = f"target/{self.profile().triplet}/release/cargo"
+    from cbuild.util import cargo
+
+    binp = cargo.target_path(self, "cargo")
 
     self.install_bin(binp)
 

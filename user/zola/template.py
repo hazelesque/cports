@@ -12,15 +12,17 @@ sha256 = "0f59479e05bce79e8d5860dc7e807ea818986094469ed8bf0bb46588ade95982"
 # generates completions with host bins
 options = ["!cross"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "runs out of memory during linking"
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "zsh"]:
         with open(self.cwd / f"zola.{shell}", "w") as outf:
             self.do(
-                f"target/{self.profile().triplet}/release/zola",
+                cargo.target_path(self, "zola"),
                 "completion",
                 shell,
                 stdout=outf,
@@ -28,7 +30,9 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/zola")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "zola"))
     for shell in ["bash", "fish", "zsh"]:
         self.install_completion(f"zola.{shell}", shell)
     self.install_license("LICENSE")

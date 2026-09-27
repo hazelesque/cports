@@ -1,5 +1,5 @@
 pkgname = "akonadi-contacts"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 make_check_wrapper = ["wlheadless-run", "--"]
@@ -34,11 +34,11 @@ makedepends = [
 checkdepends = ["xwayland-run"]
 pkgdesc = "KDE Akonadi contacts libraries"
 license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
-url = "https://api.kde.org/kdepim/akonadi-contacts/html/index.html"
+url = "https://community.kde.org/KDE_PIM/index.html"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/akonadi-contacts-{pkgver}.tar.xz"
 )
-sha256 = "e63ba2740584e6620e9175b4477ad68f5cbe0aa369580e208b4502c2c3daa120"
+sha256 = "96894e82adff3e0ff84db4e6ed757a62971d4835c785efb353663a76550050e4"
 
 
 @subpackage("akonadi-contacts-devel")

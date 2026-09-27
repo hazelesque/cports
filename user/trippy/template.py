@@ -18,10 +18,12 @@ options = ["!cross"]
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "zsh"]:
         with open(self.cwd / f"trip.{shell}", "w") as outf:
             self.do(
-                f"target/{self.profile().triplet}/release/trip",
+                cargo.target_path(self, "trip"),
                 "--generate",
                 shell,
                 stdout=outf,
@@ -29,6 +31,8 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/trip")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "trip"))
     for shell in ["bash", "fish", "zsh"]:
         self.install_completion(f"trip.{shell}", shell, name="trip")

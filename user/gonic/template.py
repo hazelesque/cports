@@ -1,6 +1,6 @@
 pkgname = "gonic"
 pkgver = "0.19.0"
-pkgrel = 4
+pkgrel = 6
 build_style = "go"
 make_build_args = ["./cmd/gonic"]
 hostmakedepends = ["go", "pkgconf"]
@@ -13,6 +13,7 @@ license = "GPL-3.0-only"
 url = "https://github.com/sentriz/gonic"
 source = f"{url}/archive/refs/tags/v{pkgver}.tar.gz"
 sha256 = "929169a79ff498e08f80e4ed9d0949e87cbbf75769a7d1c6bd4cedf322bbad71"
+options = ["etcfiles"]
 
 
 def post_install(self):

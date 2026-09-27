@@ -1,5 +1,5 @@
 pkgname = "kinfocenter"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -27,7 +27,7 @@ pkgdesc = "Utility providing information about your system"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 url = "https://invent.kde.org/plasma/kinfocenter"
 source = f"$(KDE_SITE)/plasma/{pkgver}/kinfocenter-{pkgver}.tar.xz"
-sha256 = "9b777f870f120939e374215ce2ced389571d4bdeb4f6f0092c908b8c2e0c2fd6"
+sha256 = "e3aeb4b6f7237fddff4e68f4d7d715772cc47bd0ac376febe24ae3d717680416"
 # symlink to systemsettings, runtime dep provided
 broken_symlinks = ["usr/bin/kinfocenter"]
 hardening = ["vis"]
@@ -56,7 +56,7 @@ def _(self):
         "xdpyinfo",
     ]
     self.options = ["empty"]
-    if self.rparent.profile().arch in ["aarch64", "riscv64", "x86_64"]:
+    if self.rparent.profile.arch in ["aarch64", "riscv64", "x86_64"]:
         self.depends += ["dmidecode"]
 
     return []

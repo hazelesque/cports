@@ -1,5 +1,5 @@
 pkgname = "yt-dlp"
-pkgver = "2026.03.17"
+pkgver = "2026.08.19"
 pkgrel = 0
 build_style = "python_pep517"
 make_check_args = [
@@ -28,7 +28,7 @@ url = "https://github.com/yt-dlp/yt-dlp"
 source = (
     f"{url}/releases/download/{pkgver}/yt-dlp.tar.gz>yt-dlp-{pkgver}.tar.gz"
 )
-sha256 = "c74f56fc88a7f9b7c995646f30538974a03dd7609f55257b20594fdeeb1e13df"
+sha256 = "072aad4f2a7604e92155f61a275a4752dc64046c8f6d90df3710525d94cd37c1"
 
 
 @subpackage("yt-dlp-recommends")
@@ -41,6 +41,16 @@ def _(self):
         "python-secretstorage",
         "python-websockets",
     ]
+    # don't pull in on platforms not supported by node, as that will prevent
+    # building yt-dlp on platforms that can't build yt-dlp-ejs
+    if self.rparent.profile.arch in [
+        "aarch64",
+        "loongarch64",
+        "ppc64le",
+        "riscv64",
+        "x86_64",
+    ]:
+        self.depends += ["yt-dlp-ejs"]
     self.subdesc = "recommended dependencies"
     self.install_if = [self.parent]
     self.options = ["empty"]

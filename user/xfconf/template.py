@@ -1,10 +1,9 @@
 pkgname = "xfconf"
 pkgver = "4.20.0"
-pkgrel = 1
+pkgrel = 3
 build_style = "gnu_configure"
 configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
-    "--with-helper-path-prefix=/usr/libexec",
+    "--with-helper-path-prefix=/usr/lib",
     "--enable-gsettings-backend",
 ]
 make_check_wrapper = [

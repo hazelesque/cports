@@ -1,14 +1,12 @@
 pkgname = "geoclue"
 pkgver = "2.8.1"
-pkgrel = 0
+pkgrel = 2
 build_style = "meson"
 configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
     "-Ddbus-srv-user=_geoclue",
     "-Dgtk-doc=false",
     "-Dintrospection=true",
     "-Dvapi=true",
-    "-Ddemo-agent=false",  # problematic meson.build
 ]
 hostmakedepends = [
     "gettext",
@@ -31,6 +29,7 @@ license = "LGPL-2.1-or-later"
 url = "https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home"
 source = f"https://gitlab.freedesktop.org/geoclue/geoclue/-/archive/{pkgver}/geoclue-{pkgver}.tar.bz2"
 sha256 = "1b5de03936bd8c031a1f6207c1857fa25a9aa1453ffe742f32a0a4a3281f2629"
+options = ["etcfiles"]
 
 
 def post_install(self):

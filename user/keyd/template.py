@@ -14,13 +14,13 @@ hardening = ["vis", "cfi"]
 # tests want /dev/uinput
 options = ["!check"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "time64 input_event brokenness"
 
 
 def post_install(self):
     self.install_license("LICENSE")
-    self.install_service("^/keyd")
-    self.install_service("^/keyd.user")
-    self.install_sysusers("^/sysusers.conf")
-    self.install_tmpfiles("^/tmpfiles.conf")
+    self.install_service(self.files_path / "keyd")
+    self.install_service(self.files_path / "keyd.user")
+    self.install_sysusers(self.files_path / "sysusers.conf")
+    self.install_tmpfiles(self.files_path / "tmpfiles.conf")

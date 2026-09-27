@@ -1,5 +1,5 @@
 pkgname = "libkcddb"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 configure_args = ["-DQT_MAJOR_VERSION=6"]
@@ -24,9 +24,9 @@ makedepends = [
 ]
 pkgdesc = "KDE library for retrieving audio metadata"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
-url = "https://api.kde.org/libkcddb/html"
+url = "https://invent.kde.org/multimedia/libkcddb"
 source = f"$(KDE_SITE)/release-service/{pkgver}/src/libkcddb-{pkgver}.tar.xz"
-sha256 = "fa73b78a36e7467bf99f88f34c2bae868f5f4f71306f4bdbc226d70ad3071949"
+sha256 = "2d86bd59ff8d1d5474e594ca0a8ce2ef5a1cabf9a27f357c6e83c9920dd1dafb"
 
 
 @subpackage("libkcddb-devel")

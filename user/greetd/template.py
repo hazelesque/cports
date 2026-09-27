@@ -17,6 +17,7 @@ license = "GPL-3.0-or-later"
 url = "https://git.sr.ht/~kennylevinsen/greetd"
 source = f"{url}/archive/{pkgver}.tar.gz"
 sha256 = "ee5cb70e0add4ca9c9fe57e47581ab0002d44c07743fb5492469f3b570db640b"
+options = ["etcfiles"]
 
 
 def pre_prepare(self):
@@ -37,9 +38,11 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/agreety")
-    self.install_bin(f"target/{self.profile().triplet}/release/fakegreet")
-    self.install_bin(f"target/{self.profile().triplet}/release/greetd")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "agreety"))
+    self.install_bin(cargo.target_path(self, "fakegreet"))
+    self.install_bin(cargo.target_path(self, "greetd"))
 
     self.do(
         "make",

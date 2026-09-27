@@ -1,7 +1,8 @@
 pkgname = "kirigami"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
+make_check_env = {"QT_QPA_PLATFORM": "offscreen"}
 hostmakedepends = [
     "cmake",
     "extra-cmake-modules",
@@ -17,10 +18,10 @@ pkgdesc = "KDE's QtQuick based UI component set"
 license = "LGPL-2.0-only"
 url = "https://develop.kde.org/frameworks/kirigami"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kirigami-{pkgver}.tar.xz"
-sha256 = "b268785b271198acec7fe4b6177eafdee890e180245c7168916da3ccff1425ff"
+sha256 = "6de811e559c20dc1086c0cf2c34bb98712dbe4d45f960c62c3c3f887332c95f8"
 hardening = ["vis"]
 
-_have_omp = self.profile().arch in [
+_have_omp = self.profile.arch in [
     "aarch64",
     "loongarch64",
     "ppc64le",

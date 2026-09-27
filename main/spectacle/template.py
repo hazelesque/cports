@@ -1,5 +1,5 @@
 pkgname = "spectacle"
-pkgver = "6.6.5"
+pkgver = "6.7.5"
 pkgrel = 0
 build_style = "cmake"
 hostmakedepends = [
@@ -34,15 +34,15 @@ makedepends = [
     "qt6-qtbase-private-devel",  # qtx11extras_p.h
     "qt6-qtmultimedia-devel",
     "qt6-qtwayland-devel",
+    "tesseract-devel",
     "xcb-util-devel",
     "zxing-cpp-devel",
 ]
-depends = ["tesseract"]
 pkgdesc = "KDE Screenshot capture utility"
 license = "GPL-2.0-or-later"
 url = "https://apps.kde.org/spectacle"
 source = f"$(KDE_SITE)/plasma/{pkgver}/spectacle-{pkgver}.tar.xz"
-sha256 = "a37df7731a6bc89bc23ac08ad1f995ce9f1efb330f3ebad9bf926dca6ebb5fc7"
+sha256 = "2a63a8da331f9249e0ff0091a38f2fa946c7b85c7b7133bd8b60dd524e8e01b8"
 hardening = ["vis"]
 
 

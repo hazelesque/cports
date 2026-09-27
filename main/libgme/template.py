@@ -1,5 +1,5 @@
 pkgname = "libgme"
-pkgver = "0.6.4"
+pkgver = "0.6.5"
 pkgrel = 0
 build_style = "cmake"
 configure_args = [
@@ -11,12 +11,12 @@ pkgdesc = "Video game music file emulation/playback library"
 license = "LGPL-2.1-or-later"
 url = "https://github.com/libgme/game-music-emu"
 source = f"{url}/releases/download/{pkgver}/libgme-{pkgver}-src.tar.gz"
-sha256 = "6f94eac735d86bca998a7ce1170d007995191ef6d4388345a0dc5ffa1de0bafa"
+sha256 = "a133f19278222136ba0d8c27b64a07987ba05fec9d2e6d293ccd8cabdd97ddbb"
 hardening = ["!vis", "!cfi"]
 # no test target
 options = ["!check"]
 
-if self.profile().endian == "big":
+if self.profile.endian == "big":
     tool_flags = {"CXXFLAGS": ["-DMSB_FIRST=1"]}
 else:
     tool_flags = {"CXXFLAGS": ["-DLSB_FIRST=1"]}

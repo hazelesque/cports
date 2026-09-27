@@ -1,10 +1,7 @@
 pkgname = "file-roller"
-pkgver = "44.6"
+pkgver = "44.7"
 pkgrel = 0
 build_style = "meson"
-configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
-]
 hostmakedepends = [
     "desktop-file-utils",
     "gettext",
@@ -27,4 +24,4 @@ pkgdesc = "GNOME archiver frontend"
 license = "GPL-2.0-or-later"
 url = "https://wiki.gnome.org/Apps/FileRoller"
 source = f"https://gitlab.gnome.org/GNOME/file-roller/-/archive/{pkgver}/file-roller-{pkgver}.tar.gz"
-sha256 = "57567a1d8320aaba9131832aadce72a8845052e8105c0734cc2713b323f911a1"
+sha256 = "86533212a24cf4581023d4c6f74d40d003234ad978b09b013cecd9675131fd45"

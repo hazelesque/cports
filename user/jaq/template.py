@@ -1,11 +1,11 @@
 pkgname = "jaq"
-pkgver = "3.0.0"
+pkgver = "3.1.1"
 pkgrel = 0
 build_style = "cargo"
 # disable the default mimalloc feature and just use the system allocator
 make_build_args = ["--no-default-features", "--bin", "jaq"]
 make_install_args = [*make_build_args]
-make_check_args = [*make_build_args]
+make_check_args = ["--no-default-features"]
 hostmakedepends = ["cargo-auditable"]
 makedepends = ["rust-std"]
 pkgdesc = "JSON data processing tool with jq compatible syntax"
@@ -17,12 +17,14 @@ source = [
 ]
 source_paths = [".", "manpage"]
 sha256 = [
-    "c56948c90d0c3566c8b33eedd9fa61587ffbb2feef7d78172955876d6e10a315",
+    "9b8587436be48b5791c8276573321a3d4f404e0dc77ea6503d05725a55edd266",
     "01c39aa68e2086d3dfe88031984f25cd1eb6d3f146b371f55c7c4e9ba2dbfa77",
 ]
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/jaq")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "jaq"))
     self.install_man(self.sources_path / "jaq.1")
     self.install_license("LICENSE-MIT")

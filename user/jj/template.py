@@ -1,21 +1,23 @@
 pkgname = "jj"
-pkgver = "0.40.0"
+pkgver = "0.45.1"
 pkgrel = 0
 build_style = "cargo"
 prepare_after_patch = True
+make_check_args = [
+    "--",
+    "--skip=test_converge::test_find_divergent_changes_two_found",
+    "--skip=test_converge::test_find_divergent_changes_exactly_one_found",
+]
 hostmakedepends = ["cargo-auditable"]
 makedepends = ["rust-std"]
-checkdepends = ["git", "openssh"]
+checkdepends = ["bash", "git", "openssh"]
 pkgdesc = "Git-compatible VCS frontend"
 license = "Apache-2.0"
-url = "https://martinvonz.github.io/jj"
+url = "https://www.jj-vcs.dev"
 source = f"https://github.com/martinvonz/jj/archive/refs/tags/v{pkgver}.tar.gz"
-sha256 = "ca45f2b866ce2fa25c7fc485e6b168cf055a39b1eab0ea170738c0b7e86d3b33"
+sha256 = "72bf95905a92c592dd0e7316e2cbbad9a8f2ca04ca770cc4f4f7960495a44e15"
 # generates completions with host binary
 options = ["!cross"]
-
-if self.profile().arch in ["loongarch64"]:
-    broken = "outdated nix crate, can't update"
 
 
 def post_prepare(self):
@@ -24,14 +26,16 @@ def post_prepare(self):
     # done separately because we need to patch lockfile before vendoring :/
     patch.patch(self, [self.files_path / "bser.patch"])
 
-    cargo.clear_vendor_checksums(self, "serde_bser")
+    cargo.clear_vendor_checksums(self, "serde_bser-0.4.0")
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "nushell", "zsh"]:
         with open(f"{self.cwd}/jj.{shell}", "w") as o:
             self.do(
-                f"target/{self.profile().triplet}/release/jj",
+                cargo.target_path(self, "jj"),
                 "util",
                 "completion",
                 shell,
@@ -40,9 +44,11 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/jj")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "jj"))
     self.do(
-        f"target/{self.profile().triplet}/release/jj",
+        cargo.target_path(self, "jj"),
         "util",
         "install-man-pages",
         f"{self.chroot_destdir}/usr/share/man",

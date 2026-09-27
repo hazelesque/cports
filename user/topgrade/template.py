@@ -1,5 +1,5 @@
 pkgname = "topgrade"
-pkgver = "17.4.0"
+pkgver = "17.8.0"
 pkgrel = 0
 build_style = "cargo"
 hostmakedepends = ["cargo-auditable"]
@@ -8,30 +8,34 @@ pkgdesc = "Multiple package-manager system updater"
 license = "GPL-3.0-or-later"
 url = "https://github.com/topgrade-rs/topgrade"
 source = f"{url}/archive/refs/tags/v{pkgver}.tar.gz"
-sha256 = "97b325d4e17b1b5699090382af2240c70629432da4677400151aae05af38cf64"
+sha256 = "e723b723db7ef3179417e3529bd67a637a3ceafed8f63ee81202cfae9200ad9b"
 # generates completions with host binary
 options = ["!cross"]
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "zsh"]:
         with open(f"{self.cwd}/topgrade.{shell}", "w") as o:
             self.do(
-                f"target/{self.profile().triplet}/release/topgrade",
+                cargo.target_path(self, "topgrade"),
                 "--gen-completion",
                 shell,
                 stdout=o,
             )
     with open(f"{self.cwd}/topgrade.1", "w") as o:
         self.do(
-            f"target/{self.profile().triplet}/release/topgrade",
+            cargo.target_path("topgrade"),
             "--gen-manpage",
             stdout=o,
         )
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/topgrade")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "topgrade"))
     for shell in ["bash", "fish", "zsh"]:
         self.install_completion(f"topgrade.{shell}", shell)
     self.install_man("topgrade.1")

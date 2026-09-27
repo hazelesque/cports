@@ -1,6 +1,6 @@
 pkgname = "dino"
 pkgver = "0.5.1"
-pkgrel = 0
+pkgrel = 1
 build_style = "meson"
 configure_args = [
     "-Ddefault_library=shared",
@@ -37,7 +37,7 @@ url = "https://github.com/dino/dino"
 source = f"{url}/archive/v{pkgver}.tar.gz"
 sha256 = "2658b83abe1203b2dd4d6444519f615b979faaac7e97f384e655bff85769584b"
 
-if self.profile().endian != "big":
+if self.profile.endian != "big":
     makedepends += ["webrtc-audio-processing-devel"]
 
 

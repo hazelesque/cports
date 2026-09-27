@@ -1,7 +1,9 @@
 pkgname = "libthai"
-pkgver = "0.1.29"
-pkgrel = 0
+pkgver = "0.1.30"
+pkgrel = 1
 build_style = "gnu_configure"
+# broken conftest
+configure_args = ["libthai_cv_have_version_script=yes"]
 # fails to regen
 configure_gen = []
 make_install_args = ["-j1"]
@@ -11,9 +13,9 @@ pkgdesc = "Thai language support routines"
 license = "LGPL-2.1-or-later"
 url = "https://linux.thai.net/projects/libthai"
 source = f"https://linux.thai.net/pub/ThaiLinux/software/libthai/libthai-{pkgver}.tar.xz"
-sha256 = "fc80cc7dcb50e11302b417cebd24f2d30a8b987292e77e003267b9100d0f4bcd"
+sha256 = "ddba8b53dfe584c3253766030218a88825488a51a7deef041d096e715af64bdd"
 
-if self.profile().cross:
+if self.profile.cross:
     hostmakedepends += ["libdatrie"]
 
 

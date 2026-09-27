@@ -1,5 +1,5 @@
 pkgname = "typst"
-pkgver = "0.14.2"
+pkgver = "0.15.1"
 pkgrel = 0
 build_style = "cargo"
 make_build_args = ["-p", "typst-cli"]
@@ -14,16 +14,19 @@ pkgdesc = "Markup-based typesetting system"
 license = "Apache-2.0"
 url = "https://typst.app"
 source = f"https://github.com/typst/typst/archive/refs/tags/v{pkgver}.tar.gz"
-sha256 = "70a56445020ca05efc571c7b07a1a9f52eb93842d420518693c077ae74e54142"
+sha256 = "c07909e01a2a6941e52c9b616e48c209c755eed416d62bcf5583c37a4aca01a3"
 # takes forever
 options = ["!check"]
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "atomic64 shenanigans"
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/typst")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "typst"))
+
     with self.pushd("crates/typst-cli/generated"):
         self.install_man("typst*.1", glob=True)
         self.install_completion("typst.bash", "bash")

@@ -1,5 +1,5 @@
 pkgname = "konsole"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 make_check_args = ["-E", "(TerminalInterfaceTest|PtyTest)"]
@@ -30,6 +30,7 @@ makedepends = [
     "kparts-devel",
     "kpty-devel",
     "ktextwidgets-devel",
+    "libssh-devel",
     "qt6-qt5compat-devel",
     "qt6-qtmultimedia-devel",
 ]
@@ -37,5 +38,5 @@ pkgdesc = "KDE's Terminal Emulator"
 license = "GPL-2.0-or-later"
 url = "https://apps.kde.org/konsole"
 source = f"$(KDE_SITE)/release-service/{pkgver}/src/konsole-{pkgver}.tar.xz"
-sha256 = "4c59dabc4b64201c61458e8997a66d1aa7dc98b181e5e85f3c0f5cb69066d963"
+sha256 = "64d8aaba741f4412ede26ffbbbe3824523e941b725d3046ec27f510fd42d82e6"
 hardening = ["vis"]

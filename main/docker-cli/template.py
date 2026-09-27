@@ -1,8 +1,8 @@
 pkgname = "docker-cli"
-pkgver = "29.5.0"
-pkgrel = 1
+pkgver = "29.8.1"
+pkgrel = 0
 build_style = "makefile"
-_commit = "98f14649600f05480629d5c481878b1e1bcb7c17"
+_commit = "4a63305d74332de5ceba7fcbccbc3cbb7412f5ba"
 make_build_target = "dynbinary"
 hostmakedepends = [
     "bash",
@@ -15,7 +15,7 @@ pkgdesc = "Container and image management tool"
 license = "Apache-2.0"
 url = "https://docker.com"
 source = f"https://github.com/docker/cli/archive/v{pkgver}.tar.gz"
-sha256 = "df1d83df1ffd4045e0a514ef4ea9e2dcb75cd57d6da48d02fd34c25ccbc3e49d"
+sha256 = "55bcae5053f0914118d229658e2ac3a877dbdead6cb2c322e525d0c1e8bf78d2"
 env = {
     "AUTO_GOPATH": "1",
     "GITCOMMIT": _commit,
@@ -25,7 +25,7 @@ env = {
 # nah
 options = ["!check"]
 
-if self.profile().arch == "loongarch64":
+if self.profile.arch == "loongarch64":
     broken = "PIC linking issues"
 
 
@@ -38,7 +38,7 @@ def init_build(self):
 
     self.env["GOPATH"] = str(self.chroot_cwd)
     self.env["GOBIN"] = str(self.chroot_cwd / "bin")
-    if self.profile().arch == "loongarch64":
+    if self.profile.arch == "loongarch64":
         self.env["CGO_ENABLED"] = "0"
     else:
         self.env["CGO_ENABLED"] = "1"

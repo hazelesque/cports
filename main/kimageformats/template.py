@@ -1,5 +1,5 @@
 pkgname = "kimageformats"
-pkgver = "6.26.0"
+pkgver = "6.30.0"
 pkgrel = 0
 build_style = "cmake"
 configure_args = ["-DKIMAGEFORMATS_HEIF=ON"]
@@ -7,9 +7,10 @@ configure_args = ["-DKIMAGEFORMATS_HEIF=ON"]
 # dds; read fails on ppc64le
 # xcf; read fails on aarch64
 # avci; needs libheif built against openh264 but that SIGILLs atm
+# heif; brotli.heif: error while reading options
 make_check_args = [
     "-E",
-    "kimageformats-(write-(exr|hej2)|read-(dds|hej2|xcf|avci))",
+    "kimageformats-(write-(exr|hej2)|read-(dds|hej2|xcf|avci|heif))",
 ]
 make_check_env = {"QT_QPA_PLATFORM": "offscreen"}
 hostmakedepends = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
@@ -25,6 +26,6 @@ makedepends = [
 ]
 pkgdesc = "Image format plugins for Qt6"
 license = "LGPL-2.1-or-later"
-url = "https://api.kde.org/frameworks/kimageformats/html"
+url = "https://community.kde.org/Frameworks"
 source = f"$(KDE_SITE)/frameworks/{pkgver[: pkgver.rfind('.')]}/kimageformats-{pkgver}.tar.xz"
-sha256 = "c192552ee1831fd5e09af4e3633bb24726dfb4031170c4285024683bedaf9972"
+sha256 = "f74ea9ede7877afb66f4d7dea567f074bf63d806a824c87a9d9067d05848a316"

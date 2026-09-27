@@ -1,6 +1,7 @@
 pkgname = "tdesktop"
-pkgver = "6.7.6"
-pkgrel = 2
+pkgver = "7.0.9"
+pkgrel = 0
+archs = ["aarch64", "loongarch64", "ppc64le", "riscv64", "x86_64"]
 build_style = "cmake"
 configure_args = [
     "-DBUILD_SHARED_LIBS=OFF",
@@ -64,20 +65,20 @@ license = "GPL-3.0-or-later"
 url = "https://desktop.telegram.org"
 source = [
     f"https://github.com/telegramdesktop/tdesktop/releases/download/v{pkgver}/tdesktop-{pkgver}-full.tar.gz",
-    "https://github.com/tdlib/td/archive/8921c22f0f85b3cb0b56303f9cba81ba8549f4e8.tar.gz",
+    "https://github.com/tdlib/td/archive/022d60202e446ad1287b9fb68e687c8a0760788b.tar.gz",
 ]
 source_paths = [".", "tde2e"]
 sha256 = [
-    "5d3ba64c0d3e27468993d2376c68021152ea9c9e34ebadd8bee66a1e85e9d163",
-    "3ddfe1124611f47622df2a3128f9f50500b41c7d82e3f0d60f9ed10470689fa0",
+    "b906980ba9dad0c82ad53d5a17ece95c1cab35e655ef981abe63cf157344ca6b",
+    "b0837cd880a6de8d45abdfd5024fe0f042c100eb5f241a5f185ba65579acfc32",
 ]
 tool_flags = {"CXXFLAGS": [], "CFLAGS": []}
 # crashes
 hardening = ["!int"]
 
-if self.profile().endian == "big":
+if self.profile.endian == "big":
     broken = "broken at protocol level"
-elif self.profile().arch == "riscv64":
+elif self.profile.arch == "riscv64":
     broken = "compiler segfault"
 
 

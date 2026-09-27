@@ -1,5 +1,5 @@
 pkgname = "kunifiedpush"
-pkgver = "26.04.1"
+pkgver = "26.08.1"
 pkgrel = 0
 build_style = "cmake"
 make_check_wrapper = ["dbus-run-session", "--"]
@@ -23,11 +23,12 @@ makedepends = [
 checkdepends = ["dbus"]
 pkgdesc = "KDE library for push notifications"
 license = "LGPL-2.0-or-later"
-url = "https://api.kde.org/kunifiedpush/html"
+url = "https://invent.kde.org/libraries/kunifiedpush"
 source = (
     f"$(KDE_SITE)/release-service/{pkgver}/src/kunifiedpush-{pkgver}.tar.xz"
 )
-sha256 = "4be7f9343bc2336484847ff46f2cdd26ec869a851fd0072a4d0b933d888708cf"
+sha256 = "818476fbf87df903f92f875302ab9d76fc136d05f42530d35f58f3cc10f0a904"
+options = ["etcfiles"]
 
 
 def post_install(self):

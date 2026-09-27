@@ -1,2 +1,4 @@
-url = "https://git.netfilter.org/nftables/refs/tags"
-pattern = r"h=v([\d.]+)"
+url = "https://git.netfilter.org/nftables"
+pattern_style = "git_forge"
+# because netfilter is being annoying with anubis
+agent_name = "git"

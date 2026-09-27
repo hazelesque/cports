@@ -1,9 +1,8 @@
 pkgname = "libayatana-indicator"
-pkgver = "0.9.4"
-pkgrel = 1
+pkgver = "0.9.5"
+pkgrel = 0
 build_style = "cmake"
 configure_args = [
-    "-DCMAKE_INSTALL_LIBEXECDIR=libexec",  # TODO switch libexec
     "-DENABLE_TESTS=ON",
 ]
 # Tests run xvfb-run on their own but that fails for some reason
@@ -14,14 +13,12 @@ makedepends = [
     "glib-devel",
     "gtk+3-devel",
 ]
-checkdepends = ["bash", "dbus-test-runner", "xserver-xorg-xvfb"]
+checkdepends = ["dbus-test-runner", "xserver-xorg-xvfb"]
 pkgdesc = "Ayatana Indicators Shared Library"
 license = "GPL-3.0-only"
 url = "https://github.com/AyatanaIndicators/libayatana-indicator"
 source = f"{url}/archive/refs/tags/{pkgver}.tar.gz"
-sha256 = "a18d3c682e29afd77db24366f8475b26bda22b0e16ff569a2ec71cd6eb4eac95"
-# test-indicator-ng-tester times out
-options = ["!check"]
+sha256 = "73d71c908b803f12e4a5ecd8392511b58afbdd0c82ad7909611a17bb7847c5c8"
 
 
 @subpackage("libayatana-indicator-devel")

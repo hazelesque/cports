@@ -25,7 +25,7 @@ url = "https://gitlab.gnome.org/World/Fragments"
 source = f"{url}/-/archive/{pkgver}/Fragments-{pkgver}.tar.gz"
 sha256 = "33b9b68a85450288e930fcbcf1af0fcf3f630e3493f5e8784f05f4e32620703f"
 
-if self.profile().wordsize == 32:
+if self.profile.wordsize == 32:
     broken = "needs atomic64"
 
 
@@ -56,6 +56,6 @@ def init_build(self):
 
 
 def post_install(self):
-    self.install_bin(
-        f"./build/target/{self.profile().triplet}/release/fragments"
-    )
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "fragments", "build/target"))

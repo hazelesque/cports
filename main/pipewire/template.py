@@ -1,5 +1,5 @@
 pkgname = "pipewire"
-pkgver = "1.6.0"
+pkgver = "1.6.9"
 pkgrel = 0
 build_style = "meson"
 configure_args = [
@@ -84,9 +84,9 @@ pkgdesc = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 url = "https://pipewire.org"
 source = f"https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/{pkgver}/pipewire-{pkgver}.tar.gz"
-sha256 = "eef582901d8323669560dd32e3b76b1b15011d73a38f0035a3f11b933112f397"
+sha256 = "dbc3624cf71215c26a22fc98f6f71f7b8599f5f6b415eab4a5c90ca96c170c7c"
 
-if self.profile().endian == "big":
+if self.profile.endian == "big":
     configure_args += [
         "-Dbluez5-codec-ldac=disabled",
         "-Decho-cancel-webrtc=disabled",
@@ -185,6 +185,7 @@ def _(self):
     self.subdesc = "use for ALSA by default"
     self.install_if = [self.with_pkgver("pipewire-alsa")]
     self.renames = ["alsa-pipewire-default"]
+    self.options = ["etcfiles"]
 
     return [
         "@etc/alsa/conf.d/99-pipewire-default.conf=>../../../usr/share/alsa/alsa.conf.d/99-pipewire-default.conf"

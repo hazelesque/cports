@@ -14,10 +14,12 @@ options = ["!cross"]
 
 
 def post_build(self):
+    from cbuild.util import cargo
+
     for shell in ["bash", "fish", "nushell", "zsh"]:
         with open(self.cwd / f"kdlfmt.{shell}", "w") as outf:
             self.do(
-                f"target/{self.profile().triplet}/release/kdlfmt",
+                cargo.target_path(self, "kdlfmt"),
                 "completions",
                 shell,
                 stdout=outf,
@@ -25,7 +27,9 @@ def post_build(self):
 
 
 def install(self):
-    self.install_bin(f"target/{self.profile().triplet}/release/kdlfmt")
+    from cbuild.util import cargo
+
+    self.install_bin(cargo.target_path(self, "kdlfmt"))
     self.install_license("LICENSE")
     for shell in ["bash", "fish", "nushell", "zsh"]:
         self.install_completion(f"kdlfmt.{shell}", shell)

@@ -1,9 +1,8 @@
 pkgname = "vte"
 pkgver = "0.84.0"
-pkgrel = 0
+pkgrel = 1
 build_style = "meson"
 configure_args = [
-    "--libexecdir=/usr/libexec",  # TODO switch libexec
     "-D_systemd=false",
     "-Dgir=true",
     "-Dvapi=true",
@@ -41,7 +40,7 @@ url = "https://wiki.gnome.org/Apps/Terminal/VTE"
 source = f"$(GNOME_SITE)/vte/{pkgver[: pkgver.rfind('.')]}/vte-{pkgver}.tar.xz"
 sha256 = "0414e31583836aeb7878da25f67c515f7e8879917ecc37c92e26b83e8d8fc3e3"
 # assert in meson
-options = ["!lto", "!cross"]
+options = ["etcfiles", "!lto", "!cross"]
 
 tool_flags = {
     "CFLAGS": ["-Wno-cast-function-type-strict"],

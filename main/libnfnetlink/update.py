@@ -1,2 +1,4 @@
-url = "https://git.netfilter.org/libnfnetlink/refs/tags"
-pattern = r"libnfnetlink-([\d.]+)"
+url = "https://git.netfilter.org/libnfnetlink"
+pattern_style = "git_forge"
+# because netfilter is being annoying with anubis
+agent_name = "git"
