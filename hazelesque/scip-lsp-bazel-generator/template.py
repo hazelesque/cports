@@ -38,7 +38,7 @@
 
 pkgname = "scip-lsp-bazel-generator"
 pkgver = "0.1.2"
-pkgrel = 1
+pkgrel = 2
 hostmakedepends = [
     # Needed at configure time so cbuild populates
     # self.python_version (see Packaging.md "self.python_version").
